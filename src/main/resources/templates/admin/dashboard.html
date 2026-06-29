@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Dashboard</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="dashboard-container">
+    <h1>Admin Dashboard</h1>
+    <div class="dashboard-grid">
+        <div class="dashboard-card">
+            <h2 th:text="${totalUsers}">0</h2>
+            <p>Total Users</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h2 th:text="${candidates}">0</h2>
+            <p>Candidates</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h2 th:text="${hrManagers}">0</h2>
+            <p>HR Managers</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h2 th:text="${interviewers}">0</h2>
+            <p>Interviewers</p>
+        </div>
+
+        <div class="dashboard-card">
+            <h2 th:text="${lockedUsers}">0</h2>
+            <p>Locked Users</p>
+        </div>
+    </div>
+
+    <div class="quick-action">
+        <a th:href="@{/admin/users}"
+           class="btn-green">
+            Manage Users
+        </a>
+
+        <a th:href="@{/admin/activity-log}"
+           class="btn-blue">
+            Activity Log
+        </a>
+    </div>
+</div>
+</body>
+</html>

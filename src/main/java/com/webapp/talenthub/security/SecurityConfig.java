@@ -36,6 +36,8 @@ public class SecurityConfig {
                                 "/images/**"
                         ).permitAll()
 
+                        .requestMatchers("/admin/**").hasRole("ADMIN")
+                        
                         .anyRequest().authenticated()
                 )
 
@@ -46,6 +48,7 @@ public class SecurityConfig {
                         .failureUrl("/login?error")
                         .permitAll()
                 )
+
 
                 .logout(logout -> logout.permitAll());
 

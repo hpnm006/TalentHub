@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head th:replace="fragments/header :: header('My Profile')"></head>
+
+<div class="page-container">
+
+    <aside sec:authorize="hasAnyRole('ADMIN','HR_MANAGER')"
+           th:replace="fragments/sidebar :: sidebar">
+    </aside>
+
+    <main class="content">
+
+        <section class="profile-banner">
+
+            <div class="avatar-circle">
+
+                <span th:text="${#strings.substring(user.fullName,0,1)}">
+                    U
+                </span>
+
+            </div>
+
+            <h1 th:text="${user.fullName}">
+                Full Name
+            </h1>
+
+            <p class="role-tag"
+               th:text="${user.role}">
+            </p>
+
+        </section>
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>Account Information</h2>
+
+            </div>
+
+            <div class="profile-grid">
+
+                <div class="profile-item">
+
+                    <label>Full Name</label>
+
+                    <p th:text="${user.fullName}"></p>
+
+                </div>
+
+                <div class="profile-item">
+
+                    <label>Username</label>
+
+                    <p th:text="${user.username}"></p>
+
+                </div>
+
+                <div class="profile-item">
+
+                    <label>Email</label>
+
+                    <p th:text="${user.email}"></p>
+
+                </div>
+
+                <div class="profile-item">
+
+                    <label>Role</label>
+
+                    <p th:text="${user.role}"></p>
+
+                </div>
+
+                <div class="profile-item">
+
+                    <label>Status</label>
+
+                    <span class="status active"
+                          th:if="${user.enabled}">
+                        Active
+                    </span>
+
+                    <span class="status inactive"
+                          th:unless="${user.enabled}">
+                        Disabled
+                    </span>
+
+                </div>
+
+            </div>
+
+        </section>
+
+        <section class="card">
+
+            <div class="card-header">
+
+                <h2>Quick Actions</h2>
+
+            </div>
+
+            <div class="action-grid">
+
+                <a class="action-card"
+                   th:href="@{/change-password}">
+
+                    🔒
+
+                    <h4>Change Password</h4>
+
+                </a>
+
+                <a class="action-card"
+                   sec:authorize="hasAnyRole('ADMIN','HR_MANAGER')"
+                   th:href="@{/admin/dashboard}">
+
+                    📊
+
+                    <h4>Dashboard</h4>
+
+                </a>
+
+                <a class="action-card"
+                   sec:authorize="hasRole('ADMIN')"
+                   th:href="@{/admin/users}">
+
+                    👥
+
+                    <h4>User Management</h4>
+
+                </a>
+
+                <a class="action-card"
+                   sec:authorize="hasRole('ADMIN')"
+                   th:href="@{/admin/activity-log}">
+
+                    📋
+
+                    <h4>Activity Log</h4>
+
+                </a>
+
+            </div>
+
+        </section>
+
+        <div class="logout-box">
+
+            <form th:action="@{/logout}" method="post">
+
+                <button class="logout-btn">
+
+                    Logout
+
+                </button>
+
+            </form>
+
+        </div>
+
+    </main>
+
+</div>
+
+<div th:replace="fragments/footer :: footer"></div>
+
+</html>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<head>
+    <title>Activity Log</title>
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="dashboard-container">
+
+    <h1>Activity Log</h1>
+
+    <table class="user-table">
+        <thead>
+        <tr>
+            <th>Time</th>
+            <th>User</th>
+            <th>Action</th>
+            <th>Description</th>
+        </tr>
+        </thead>
+        <tbody>
+
+        <tr th:each="log : ${logs}">
+            <td th:text="${#temporals.format(log.createdAt,'dd/MM/yyyy HH:mm')}"></td>
+            <td th:text="${log.username}"></td>
+            <td>
+                <span class="badge-role"
+                      th:text="${log.action}">
+                </span>
+            </td>
+            <td th:text="${log.description}"></td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

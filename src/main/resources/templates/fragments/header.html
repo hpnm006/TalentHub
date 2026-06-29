@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<th:block th:fragment="header(title)">
+
+    <head>
+
+        <meta charset="UTF-8">
+
+        <meta name="viewport"
+              content="width=device-width, initial-scale=1.0">
+
+        <title th:text="${title}">TalentHub</title>
+
+        <link rel="preconnect"
+              href="https://fonts.googleapis.com">
+
+        <link rel="preconnect"
+              href="https://fonts.gstatic.com"
+              crossorigin>
+
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap"
+              rel="stylesheet">
+
+        <link rel="stylesheet"
+              th:href="@{/css/style.css}">
+
+    </head>
+
+    <body>
+
+    <header>
+
+        <div class="nav-container">
+
+            <a th:href="@{/}" class="logo">
+
+                <svg width="24"
+                     height="24"
+                     viewBox="0 0 24 24"
+                     fill="none"
+                     stroke="currentColor"
+                     stroke-width="2.5"
+                     style="color: var(--primary)">
+
+                    <rect x="2" y="7"
+                          width="20"
+                          height="14"
+                          rx="2"/>
+
+                    <path d="M17 7V5C17 3.89543
+                         16.1046 3
+                         15 3H9C7.89543 3
+                         7 3.89543
+                         7 5V7"/>
+
+                </svg>
+
+                Talent<span>Hub</span>
+
+            </a>
+
+            <nav>
+
+                <ul class="nav-links">
+
+                    <li>
+                        <a th:href="@{/jobs}">
+                            Việc làm
+                        </a>
+                    </li>
+
+                    <li sec:authorize="hasRole('CANDIDATE')">
+
+                        <a th:href="@{/my-applications}">
+                            Việc đã ứng tuyển
+                        </a>
+
+                    </li>
+
+                    <li sec:authorize="hasAnyRole('ADMIN','HR_MANAGER')">
+
+                        <a th:href="@{/admin/dashboard}">
+                            Dashboard
+                        </a>
+
+                    </li>
+
+                    <li sec:authorize="isAuthenticated()">
+
+                        <a th:href="@{/profile}">
+                            Hồ sơ
+                        </a>
+
+                    </li>
+
+                    <li sec:authorize="isAuthenticated()">
+
+                        <a th:href="@{/change-password}">
+                            Đổi mật khẩu
+                        </a>
+
+                    </li>
+
+                    <li sec:authorize="!isAuthenticated()">
+
+                        <a th:href="@{/login}"
+                           class="btn-login">
+
+                            Đăng nhập
+
+                        </a>
+
+                    </li>
+
+                    <li sec:authorize="!isAuthenticated()">
+
+                        <a th:href="@{/register}"
+                           class="btn-signup">
+
+                            Đăng ký
+
+                        </a>
+
+                    </li>
+
+                    <li sec:authorize="isAuthenticated()">
+
+                        <form th:action="@{/logout}"
+                              method="post"
+                              style="display:inline;">
+
+                            <button
+                                    type="submit"
+                                    style="background:none;
+                                border:none;
+                                cursor:pointer;
+                                font-weight:600;
+                                color:var(--text-title);">
+
+                                Đăng xuất
+
+                            </button>
+
+                        </form>
+
+                    </li>
+
+                </ul>
+
+            </nav>
+
+        </div>
+
+    </header>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+
+<head>
+
+    <title>User Management</title>
+
+    <link rel="stylesheet"
+          th:href="@{/css/style.css}">
+
+</head>
+
+<body>
+
+<div class="dashboard-container">
+
+    <h1>User Management</h1>
+
+    <!-- Search -->
+    <div class="toolbar">
+        <form th:action="@{/admin/users/search}"
+              method="get">
+            <input
+                    type="text"
+                    name="keyword"
+                    placeholder="Search by name, username or email"
+                    th:value="${keyword}">
+            <button class="btn-green">
+                Search
+            </button>
+        </form>
+
+        <a th:href="@{/admin/users/create}"
+           class="btn-blue">
+            + Create User
+        </a>
+    </div>
+    <table class="user-table">
+        <thead>
+        <tr>
+            <th>ID</th>
+            <th>Full Name</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:each="user : ${users}">
+            <td th:text="${user.id}"></td>
+            <td th:text="${user.fullName}"></td>
+            <td th:text="${user.username}"></td>
+            <td th:text="${user.email}"></td>
+
+            <td>
+                <span class="badge-role"
+                      th:text="${user.role}">
+                </span>
+            </td>
+
+            <td>
+                <span
+                        th:if="${user.enabled}"
+                        class="status active">
+                    Active
+                </span>
+
+                <span
+                        th:unless="${user.enabled}"
+                        class="status inactive">
+                    Disabled
+                </span>
+            </td>
+            <td>
+                <div class="action-group">
+                    <a
+                            th:href="@{'/admin/users/edit/' + ${user.id}}"
+                            class="btn-action edit">
+                        Edit
+                    </a>
+
+                    <a
+                            th:if="${user.enabled}"
+                            th:href="@{'/admin/users/' + ${user.id} + '/disable'}"
+                            class="btn-action disable">
+                        Disable
+                    </a>
+
+                    <a th:unless="${user.enabled}"
+                       th:href="@{'/admin/users/' + ${user.id} + '/enable'}"
+                       class="btn-action enable">
+                        Enable
+                    </a>
+
+                    <a th:href="@{'/admin/users/' + ${user.id} + '/unlock'}"
+                       class="btn-action unlock">
+                        Unlock
+                    </a>
+                </div>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

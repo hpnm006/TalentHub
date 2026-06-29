@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+
+<th:block th:fragment="sidebar">
+
+    <div class="admin-sidebar">
+
+        <h3>Administration</h3>
+
+        <a th:href="@{/profile}">
+            👤 My Profile
+        </a>
+
+        <a th:href="@{/admin/dashboard}">
+            📊 Dashboard
+        </a>
+
+        <a th:href="@{/admin/users}">
+            👥 User Management
+        </a>
+
+        <a th:href="@{/admin/activity-log}">
+            📋 Activity Log
+        </a>
+
+        <a th:href="@{/change-password}">
+            🔒 Change Password
+        </a>
+
+    </div>
+
+</th:block>
