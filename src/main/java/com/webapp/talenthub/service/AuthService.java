@@ -11,8 +11,8 @@ import com.webapp.talenthub.dto.ChangePasswordRequest;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import com.webapp.talenthub.dto.ForgotPasswordRequest;
-import java.util.Random;
 import com.webapp.talenthub.dto.ResetPasswordRequest;
+import java.security.SecureRandom;
 
 @Service
 public class AuthService {
@@ -33,8 +33,35 @@ public class AuthService {
             return "Email already exists";
         }
 
+        if (request.getFullName() == null || request.getFullName().trim().length() < 2) {
+            return "Full name must contain at least 2 characters.";
+        }
+
+        if (!request.getFullName().matches("^[A-Za-zÀ-ỹ\\s]+$")) {
+            return "Full name contains invalid characters.";
+        }
+
+
+        if (request.getUsername().length() < 4
+                || request.getUsername().length() > 50) {
+
+            return "Username must be between 4 and 50 characters.";
+        }
+
+
+        if (!request.getUsername().matches("^[A-Za-z0-9_]+$")) {
+
+            return "Username can only contain letters, numbers and underscore.";
+        }
+
         if (!request.getPassword().equals(request.getConfirmPassword())) {
             return "Passwords do not match";
+        }
+
+        String error = validatePassword(request.getPassword());
+
+        if (error != null) {
+            return error;
         }
 
         User user = new User();
@@ -85,6 +112,12 @@ public class AuthService {
             return "New password must be different from current password";
         }
 
+        String error = validatePassword(request.getNewPassword());
+
+        if (error != null) {
+            return error;
+        }
+
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
         userRepository.save(user);
@@ -97,14 +130,16 @@ public class AuthService {
         User user = userRepository.findByEmail(request.getEmail()).orElse(null);
 
         if (user == null) {
-            return "Email does not exist";
+            return "success";
         }
 
-        Random random = new Random();
+        SecureRandom random = new SecureRandom();
 
         String code = String.format("%06d", random.nextInt(1000000));
 
         user.setResetCode(code);
+
+        user.setResetCodeExpiry(System.currentTimeMillis() + 10 * 60 * 1000);
 
         userRepository.save(user);
 
@@ -127,17 +162,48 @@ public class AuthService {
             return "Invalid reset code";
         }
 
+        if (System.currentTimeMillis() > user.getResetCodeExpiry()) {
+
+            return "Reset code has expired";
+
+        }
+
         if(!request.getNewPassword().equals(request.getConfirmPassword())){
             return "Passwords do not match";
+        }
+
+        String error = validatePassword(request.getNewPassword());
+
+        if (error != null) {
+            return error;
         }
 
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
         user.setResetCode(null);
 
+        user.setResetCodeExpiry(null);
+
         userRepository.save(user);
 
         return "success";
+    }
+
+    private String validatePassword(String password) {
+
+        if (password.length() < 8) {
+            return "Password must be at least 8 characters.";
+        }
+
+        if (!password.matches(".*[A-Z].*")) {
+            return "Password must contain at least one uppercase letter.";
+        }
+
+        if (!password.matches(".*\\d.*")) {
+            return "Password must contain at least one number.";
+        }
+
+        return null;
     }
 
 }

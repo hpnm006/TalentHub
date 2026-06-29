@@ -100,6 +100,38 @@
 
     }
 
+    .error{
+
+      color:#dc3545;
+
+      background:#f8d7da;
+
+      border:1px solid #f5c2c7;
+
+      padding:10px;
+
+      border-radius:6px;
+
+      margin-bottom:15px;
+
+      text-align:center;
+
+    }
+
+    .field-error{
+
+      color:#dc3545;
+
+      font-size:13px;
+
+      margin-top:-6px;
+
+      margin-bottom:10px;
+
+      font-weight:500;
+
+    }
+
   </style>
 
 </head>
@@ -115,20 +147,38 @@
     <input
             type="text"
             name="fullName"
+            th:value="${registerRequest.fullName}"
             placeholder="Full Name"
             required>
+
+    <div class="field-error"
+         th:if="${fullNameError}"
+         th:text="${fullNameError}">
+    </div>
 
     <input
             type="text"
             name="username"
+            th:value="${registerRequest.username}"
             placeholder="Username"
             required>
+
+    <div class="field-error"
+         th:if="${usernameError}"
+         th:text="${usernameError}">
+    </div>
 
     <input
             type="email"
             name="email"
+            th:value="${registerRequest.email}"
             placeholder="Email"
             required>
+
+    <div class="field-error"
+         th:if="${emailError}"
+         th:text="${emailError}">
+    </div>
 
     <input
             type="password"
@@ -136,11 +186,21 @@
             placeholder="Password"
             required>
 
+    <div class="field-error"
+         th:if="${passwordError}"
+         th:text="${passwordError}">
+    </div>
+
     <input
             type="password"
             name="confirmPassword"
             placeholder="Confirm Password"
             required>
+
+    <div class="field-error"
+         th:if="${confirmPasswordError}"
+         th:text="${confirmPasswordError}">
+    </div>
 
     <button type="submit">
       Create Account
