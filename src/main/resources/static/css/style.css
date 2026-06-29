@@ -1043,3 +1043,23 @@ footer {
         margin-top: 1.5rem;
     }
 }
+
+/* Job Status Badges */
+.status-draft {
+    background-color: #f1f5f9;
+    color: #475569;
+    border-color: #cbd5e1;
+}
+
+.status-active {
+    background-color: #ecfdf5;
+    color: #065f46;
+    border-color: #a7f3d0;
+}
+
+.status-closed {
+    background-color: #fee2e2;
+    color: #991b1b;
+    border-color: #fca5a5;
+}
+

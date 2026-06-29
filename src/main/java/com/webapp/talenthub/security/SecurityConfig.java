@@ -43,7 +43,7 @@ public class SecurityConfig {
                                 "/js/**",
                                 "/images/**"
                         ).permitAll()
-
+                        .requestMatchers("/hr/**", "/dashboard").hasAnyRole("ADMIN", "HR_MANAGER")
                         .anyRequest().authenticated()
                 )
 

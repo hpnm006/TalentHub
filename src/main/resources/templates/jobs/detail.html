@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Chi tiết bài tuyển dụng nội bộ - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .pipeline-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2.5rem;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+        }
+        .pipeline-step {
+            text-align: center;
+            padding: 1rem;
+            border-radius: 6px;
+            background-color: var(--bg-body);
+            border: 1px solid var(--border-color);
+        }
+        .pipeline-step.active-step {
+            border-left: 3px solid var(--primary);
+        }
+        .pipeline-number {
+            font-size: 1.75rem;
+            font-weight: 800;
+            color: var(--text-title);
+            margin-bottom: 0.25rem;
+        }
+        .pipeline-label {
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+        }
+        .step-applied { border-top: 4px solid #0284c7; }
+        .step-screening { border-top: 4px solid #d97706; }
+        .step-interview { border-top: 4px solid #7c3aed; }
+        .step-offer { border-top: 4px solid #0d9488; }
+        .step-hired { border-top: 4px solid #16a34a; }
+        .step-rejected { border-top: 4px solid #dc2626; }
+        .step-withdrawn { border-top: 4px solid #4b5563; }
+        
+        .detail-meta-grid {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+        .actions-card {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.5rem;
+            box-shadow: var(--card-shadow);
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            height: fit-content;
+        }
+        .btn-action-block {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            padding: 0.75rem;
+            border-radius: 4px;
+            font-weight: 700;
+            text-decoration: none;
+            font-size: 0.9rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1px solid transparent;
+        }
+        .btn-primary-block {
+            background-color: var(--primary);
+            color: white !important;
+        }
+        .btn-primary-block:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-secondary-block {
+            background-color: white;
+            color: var(--primary) !important;
+            border: 1px solid var(--primary);
+        }
+        .btn-secondary-block:hover {
+            background-color: rgba(0, 177, 79, 0.05);
+        }
+        .btn-grey-block {
+            background-color: #f1f5f9;
+            color: #475569 !important;
+            border: 1px solid #cbd5e1;
+        }
+        .btn-grey-block:hover {
+            background-color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    <li sec:authorize="hasRole('CANDIDATE')"><a href="/my-applications">Việc đã ứng tuyển</a></li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')"><a href="/dashboard" class="active">Nhà tuyển dụng</a></li>
+                    <li sec:authorize="isAuthenticated()"><a href="/change-password">Thiết lập</a></li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <a href="/hr/jobs" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Quay lại quản lý bài đăng
+        </a>
+
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.5rem;">
+            <h1 class="page-title" style="margin-bottom:0;" th:text="${job.title}">Senior Java Engineer</h1>
+            <div>
+                <!-- Status Badge -->
+                <span class="status-badge" 
+                      th:classappend="'status-' + ${#strings.toLowerCase(job.status.name())}"
+                      th:text="${job.status.name() == 'DRAFT' ? 'Bản nháp' : (job.status.name() == 'ACTIVE' ? 'Đang tuyển' : 'Đã đóng')}">DRAFT</span>
+            </div>
+        </div>
+
+        <!-- Pipeline Summary (SCR-12) -->
+        <h2 class="section-title" style="margin: 0 0 1rem 0;">Tổng quan hồ sơ tuyển dụng (Pipeline Summary)</h2>
+        <div class="pipeline-container" id="recruitment-pipeline-summary">
+            <div class="pipeline-step step-applied">
+                <div class="pipeline-number" th:text="${appliedCount}">0</div>
+                <div class="pipeline-label">Nộp hồ sơ</div>
+            </div>
+            <div class="pipeline-step step-screening">
+                <div class="pipeline-number" th:text="${screeningCount}">0</div>
+                <div class="pipeline-label">Sơ loại</div>
+            </div>
+            <div class="pipeline-step step-interview">
+                <div class="pipeline-number" th:text="${interviewCount}">0</div>
+                <div class="pipeline-label">Phỏng vấn</div>
+            </div>
+            <div class="pipeline-step step-offer">
+                <div class="pipeline-number" th:text="${offerCount}">0</div>
+                <div class="pipeline-label">Đề nghị</div>
+            </div>
+            <div class="pipeline-step step-hired">
+                <div class="pipeline-number" th:text="${hiredCount}">0</div>
+                <div class="pipeline-label">Đã nhận</div>
+            </div>
+            <div class="pipeline-step step-rejected">
+                <div class="pipeline-number" th:text="${rejectedCount}">0</div>
+                <div class="pipeline-label">Từ chối</div>
+            </div>
+            <div class="pipeline-step step-withdrawn">
+                <div class="pipeline-number" th:text="${withdrawnCount}">0</div>
+                <div class="pipeline-label">Rút hồ sơ</div>
+            </div>
+        </div>
+
+        <div class="detail-meta-grid">
+            <!-- Job Specs -->
+            <div class="job-detail-card" style="margin-bottom:0;">
+                <div class="job-meta-row" style="margin-bottom: 1.5rem; padding-bottom: 1rem;">
+                    <span class="badge badge-dept" th:text="${job.department}">Công nghệ</span>
+                    <span class="badge badge-loc" th:text="${job.location}">Hà Nội</span>
+                    <span class="salary-txt-prominent" th:text="${job.salaryRange}">Thương lượng</span>
+                    <span class="badge badge-deadline" th:text="'Hạn nộp: ' + (${job.deadline != null} ? ${#temporals.format(job.deadline, 'yyyy-MM-dd')} : 'Không giới hạn')">Hạn: 2026-12-31</span>
+                </div>
+
+                <div class="section-title" style="margin-top: 1.5rem;">Mô tả công việc</div>
+                <div class="rich-text" th:text="${job.description}">Mô tả công việc...</div>
+
+                <div class="section-title" style="margin-top: 2rem;">Yêu cầu ứng viên</div>
+                <div class="rich-text" th:text="${job.requirements}">Yêu cầu tuyển dụng...</div>
+            </div>
+
+            <!-- Action shortcuts (SCR-12 connections) -->
+            <div class="actions-card">
+                <h3 style="font-size:1.05rem; font-weight:700; color:var(--text-title); border-bottom: 2px solid var(--border-color); padding-bottom:0.5rem; margin-bottom:0.5rem;">Hành động nghiệp vụ</h3>
+                
+                <!-- Links to View Candidate List (SCR-16) -->
+                <a th:href="@{/applications/job/{jobId}(jobId=${job.id})}" class="btn-action-block btn-primary-block" id="btn-link-view-candidates">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                        <circle cx="9" cy="7" r="4"/>
+                        <path d="M23 21v-2a4 4 0 0 0-3-3.87"/>
+                        <path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                    </svg>
+                    Xem hồ sơ ứng viên (SCR-16)
+                </a>
+
+                <!-- Links to View Pipeline Report (SCR-20) -->
+                <a href="/reports/pipeline" class="btn-action-block btn-secondary-block" id="btn-link-view-reports">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <line x1="18" y1="20" x2="18" y2="10"/>
+                        <line x1="12" y1="20" x2="12" y2="4"/>
+                        <line x1="6" y1="20" x2="6" y2="14"/>
+                    </svg>
+                    Xem báo cáo phễu (SCR-20)
+                </a>
+
+                <!-- Edit job if not CLOSED -->
+                <a th:if="${job.status.name() != 'CLOSED'}" th:href="@{/hr/jobs/edit/{id}(id=${job.id})}" class="btn-action-block btn-grey-block" id="btn-link-edit-job">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                    </svg>
+                    Chỉnh sửa bài đăng
+                </a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+</body>
+</html>

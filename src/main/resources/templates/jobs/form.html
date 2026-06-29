@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${job.id == null} ? 'Tạo tin tuyển dụng - TalentHub' : 'Sửa tin tuyển dụng - TalentHub'">Đăng tin tuyển dụng - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        .form-card {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 2.5rem;
+            box-shadow: var(--card-shadow);
+            margin-bottom: 3rem;
+        }
+        .form-actions-row {
+            display: flex;
+            justify-content: flex-end;
+            gap: 1rem;
+            margin-top: 2rem;
+            border-top: 1px solid var(--border-color);
+            padding-top: 1.5rem;
+        }
+        .btn-draft {
+            background-color: #f1f5f9;
+            color: #475569;
+            border: 1px solid #cbd5e1;
+            padding: 0.75rem 2rem;
+            border-radius: 4px;
+            font-size: 0.95rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn-draft:hover {
+            background-color: #cbd5e1;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    <li sec:authorize="hasRole('CANDIDATE')"><a href="/my-applications">Việc đã ứng tuyển</a></li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')"><a href="/dashboard" class="active">Nhà tuyển dụng</a></li>
+                    <li sec:authorize="isAuthenticated()"><a href="/change-password">Thiết lập</a></li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        
+        <a href="/hr/jobs" class="back-link">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Quay lại quản lý bài đăng
+        </a>
+
+        <h1 class="page-title" th:text="${job.id == null} ? 'Đăng tin tuyển dụng mới' : 'Chỉnh sửa tin tuyển dụng'">Đăng tin tuyển dụng</h1>
+
+        <!-- Error & Warning Banners -->
+        <div th:if="${error}" class="alert alert-error" id="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span th:text="${error}">Lỗi lưu trữ dữ liệu</span>
+        </div>
+
+        <!-- Warning banner if closed (SCR-11) -->
+        <div th:if="${isClosed}" class="alert alert-error" style="background-color: #fee2e2; border-color: #fca5a5; color: #b91c1c;" id="closed-warning-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+            </svg>
+            <span>Bài đăng này đã ở trạng thái <strong>CLOSED (Đã đóng)</strong>. Bạn chỉ có thể xem chi tiết ở chế độ Read-only.</span>
+        </div>
+
+        <div class="form-card">
+            <form th:action="@{/hr/jobs/save}" th:object="${job}" method="post" onsubmit="return validateForm();" id="job-post-form">
+                <!-- Keep existing ID and status -->
+                <input type="hidden" th:field="*{id}" />
+                <input type="hidden" id="job-status" th:field="*{status}" />
+
+                <div class="form-group">
+                    <label for="title">Tiêu đề tin tuyển dụng <span style="color:#ef4444;">*</span></label>
+                    <input type="text" id="title" th:field="*{title}" class="form-control" placeholder="Ví dụ: Senior Java Web Developer (Thương lượng)" required th:disabled="${isClosed}"/>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                    <div class="form-group">
+                        <label for="department">Phòng ban / Bộ phận <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="department" th:field="*{department}" class="form-control" placeholder="Ví dụ: Công nghệ thông tin" required th:disabled="${isClosed}"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="location">Địa điểm làm việc <span style="color:#ef4444;">*</span></label>
+                        <input type="text" id="location" th:field="*{location}" class="form-control" placeholder="Ví dụ: Hà Nội" required th:disabled="${isClosed}"/>
+                    </div>
+                </div>
+
+                <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                    <div class="form-group">
+                        <label for="salaryRange">Mức lương tuyển dụng</label>
+                        <input type="text" id="salaryRange" th:field="*{salaryRange}" class="form-control" placeholder="Ví dụ: 15 - 25 triệu, Thỏa thuận" th:disabled="${isClosed}"/>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="deadline">Hạn nhận hồ sơ (Deadline) <span style="color:#ef4444;">*</span></label>
+                        <!-- Formats LocalDateTime dynamically to browser input format -->
+                        <input type="datetime-local" id="deadline" name="deadline" class="form-control" 
+                               th:value="${job.deadline != null ? #temporals.format(job.deadline, 'yyyy-MM-dd') + 'T' + #temporals.format(job.deadline, 'HH:mm') : ''}" required th:disabled="${isClosed}"/>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="description">Mô tả công việc</label>
+                    <textarea id="description" th:field="*{description}" class="form-control" rows="8" placeholder="Nhập nhiệm vụ, mô tả chi tiết công việc..." th:disabled="${isClosed}"></textarea>
+                </div>
+
+                <div class="form-group">
+                    <label for="requirements">Yêu cầu đối với ứng viên</label>
+                    <textarea id="requirements" th:field="*{requirements}" class="form-control" rows="8" placeholder="Nhập các chứng chỉ, kỹ năng, kinh nghiệm tối thiểu..." th:disabled="${isClosed}"></textarea>
+                </div>
+
+                <!-- Submit buttons row (Hidden if closed) -->
+                <div class="form-actions-row" th:if="${!isClosed}">
+                    <button type="button" class="btn-draft" onclick="submitWithStatus('DRAFT');" id="btn-save-draft">Lưu bản nháp</button>
+                    <button type="button" class="btn-submit" style="width:auto; padding: 0.75rem 2.5rem;" onclick="submitWithStatus('ACTIVE');" id="btn-save-publish">Đăng tuyển ngay</button>
+                </div>
+            </form>
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+    <script th:inline="javascript">
+        function submitWithStatus(status) {
+            document.getElementById('job-status').value = status;
+            document.getElementById('job-post-form').submit();
+        }
+
+        function validateForm() {
+            const deadlineInput = document.getElementById('deadline');
+            if (deadlineInput.value) {
+                const deadlineVal = new Date(deadlineInput.value);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // start of today
+                
+                if (deadlineVal < today) {
+                    alert('Hạn nhận hồ sơ (Deadline) phải là ngày hôm nay hoặc tương lai.');
+                    return false;
+                }
+            }
+            return true;
+        }
+    </script>
+</body>
+</html>

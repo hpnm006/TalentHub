@@ -1,6 +1,7 @@
 package com.webapp.talenthub.entity;
 
 import jakarta.persistence.*;
+import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "jobs")
@@ -9,36 +10,45 @@ public class Job {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "NVARCHAR(255)")
     private String title;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String description;
 
+    @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private String status = "DRAFT"; // DRAFT, ACTIVE, CLOSED
+    private JobStatus status = JobStatus.DRAFT;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String department;
+
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String location;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(columnDefinition = "NVARCHAR(MAX)")
     private String requirements;
 
+    @Column(columnDefinition = "NVARCHAR(255)")
     private String salaryRange;
 
-    private java.time.LocalDateTime deadline;
+    private LocalDateTime deadline;
 
     @Column(nullable = false, updatable = false)
-    private java.time.LocalDateTime createdAt;
+    private LocalDateTime createdAt;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "created_by_id")
+    private User createdBy;
 
     @PrePersist
     protected void onCreate() {
-        createdAt = java.time.LocalDateTime.now();
+        createdAt = LocalDateTime.now();
     }
 
     public Job() {}
 
-    public Job(Long id, String title, String description, String status, String department, String location, String requirements, String salaryRange, java.time.LocalDateTime deadline) {
+    public Job(Long id, String title, String description, JobStatus status, String department, String location, String requirements, String salaryRange, LocalDateTime deadline, User createdBy) {
         this.id = id;
         this.title = title;
         this.description = description;
@@ -48,6 +58,7 @@ public class Job {
         this.requirements = requirements;
         this.salaryRange = salaryRange;
         this.deadline = deadline;
+        this.createdBy = createdBy;
     }
 
     public Long getId() { return id; }
@@ -56,8 +67,8 @@ public class Job {
     public void setTitle(String title) { this.title = title; }
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public JobStatus getStatus() { return status; }
+    public void setStatus(JobStatus status) { this.status = status; }
 
     public String getDepartment() { return department; }
     public void setDepartment(String department) { this.department = department; }
@@ -67,7 +78,11 @@ public class Job {
     public void setRequirements(String requirements) { this.requirements = requirements; }
     public String getSalaryRange() { return salaryRange; }
     public void setSalaryRange(String salaryRange) { this.salaryRange = salaryRange; }
-    public java.time.LocalDateTime getDeadline() { return deadline; }
-    public void setDeadline(java.time.LocalDateTime deadline) { this.deadline = deadline; }
-    public java.time.LocalDateTime getCreatedAt() { return createdAt; }
+    public LocalDateTime getDeadline() { return deadline; }
+    public void setDeadline(LocalDateTime deadline) { this.deadline = deadline; }
+    public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
+
+    public User getCreatedBy() { return createdBy; }
+    public void setCreatedBy(User createdBy) { this.createdBy = createdBy; }
 }

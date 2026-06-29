@@ -33,12 +33,12 @@
                 <p th:text="${report.totalApplied}"></p>
             </div>
             <div class="stat-box">
-                <h3>New</h3>
-                <p th:text="${report.newCount}"></p>
+                <h3>Applied</h3>
+                <p th:text="${report.appliedCount}"></p>
             </div>
             <div class="stat-box">
-                <h3>Reviewing</h3>
-                <p th:text="${report.reviewingCount}"></p>
+                <h3>Screening</h3>
+                <p th:text="${report.screeningCount}"></p>
             </div>
             <div class="stat-box">
                 <h3>Interviewing</h3>
@@ -51,6 +51,10 @@
             <div class="stat-box">
                 <h3>Hired</h3>
                 <p th:text="${report.hiredCount}"></p>
+            </div>
+            <div class="stat-box" style="background-color: #f1f5f9;">
+                <h3>Withdrawn</h3>
+                <p th:text="${report.withdrawnCount}"></p>
             </div>
             <div class="stat-box" style="background-color: #fee;">
                 <h3>Rejected</h3>
