@@ -1,10 +1,11 @@
 package com.webapp.talenthub.entity;
 
 public enum ApplicationStatus {
-    NEW,
-    REVIEWING,
+    APPLIED,
+    SCREENING,
     INTERVIEW,
     OFFER,
     HIRED,
-    REJECTED
+    REJECTED,
+    WITHDRAWN
 }

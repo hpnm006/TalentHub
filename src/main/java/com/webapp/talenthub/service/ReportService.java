@@ -27,21 +27,23 @@ public class ReportService {
         Map<ApplicationStatus, Long> countsByStatus = allApplications.stream()
                 .collect(Collectors.groupingBy(Application::getStatus, Collectors.counting()));
 
-        long newCount = countsByStatus.getOrDefault(ApplicationStatus.NEW, 0L);
-        long reviewingCount = countsByStatus.getOrDefault(ApplicationStatus.REVIEWING, 0L);
+        long appliedCount = countsByStatus.getOrDefault(ApplicationStatus.APPLIED, 0L);
+        long screeningCount = countsByStatus.getOrDefault(ApplicationStatus.SCREENING, 0L);
         long interviewCount = countsByStatus.getOrDefault(ApplicationStatus.INTERVIEW, 0L);
         long offerCount = countsByStatus.getOrDefault(ApplicationStatus.OFFER, 0L);
         long hiredCount = countsByStatus.getOrDefault(ApplicationStatus.HIRED, 0L);
         long rejectedCount = countsByStatus.getOrDefault(ApplicationStatus.REJECTED, 0L);
+        long withdrawnCount = countsByStatus.getOrDefault(ApplicationStatus.WITHDRAWN, 0L);
 
         Map<String, Object> report = new HashMap<>();
         report.put("totalApplied", totalApplied);
-        report.put("newCount", newCount);
-        report.put("reviewingCount", reviewingCount);
+        report.put("appliedCount", appliedCount);
+        report.put("screeningCount", screeningCount);
         report.put("interviewCount", interviewCount);
         report.put("offerCount", offerCount);
         report.put("hiredCount", hiredCount);
         report.put("rejectedCount", rejectedCount);
+        report.put("withdrawnCount", withdrawnCount);
 
         if (totalApplied > 0) {
             report.put("interviewRate", (double) interviewCount / totalApplied * 100);

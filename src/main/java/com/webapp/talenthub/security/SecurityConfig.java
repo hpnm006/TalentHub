@@ -24,10 +24,13 @@ public class SecurityConfig {
 
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
+                                "/",
                                 "/login",
                                 "/register",
                                 "/forgot-password",
                                 "/reset-password",
+                                "/jobs",
+                                "/jobs/{id:[0-9]+}",
                                 "/css/**",
                                 "/js/**",
                                 "/images/**"

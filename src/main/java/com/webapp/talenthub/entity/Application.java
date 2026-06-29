@@ -20,7 +20,7 @@ public class Application {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    private ApplicationStatus status = ApplicationStatus.NEW;
+    private ApplicationStatus status = ApplicationStatus.APPLIED;
 
     private String cvUrl;
 

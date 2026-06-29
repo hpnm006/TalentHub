@@ -33,6 +33,11 @@ public class Interview {
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
+    private Integer rating;
+
+    @Column(columnDefinition = "TEXT")
+    private String feedback;
+
     @PrePersist
     protected void onCreate() {
         createdAt = LocalDateTime.now();
@@ -55,4 +60,9 @@ public class Interview {
     public String getNotes() { return notes; }
     public void setNotes(String notes) { this.notes = notes; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    
+    public Integer getRating() { return rating; }
+    public void setRating(Integer rating) { this.rating = rating; }
+    public String getFeedback() { return feedback; }
+    public void setFeedback(String feedback) { this.feedback = feedback; }
 }

@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Danh sách các cơ hội việc làm hấp dẫn nhất đang tuyển dụng tại TalentHub.">
+    <title>Tìm việc làm nhanh, uy tín - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #00b14f;
+            --primary-hover: #009840;
+            --bg-body: #f4f6f9;
+            --bg-white: #ffffff;
+            --text-title: #212f3f;
+            --text-body: #4d5965;
+            --text-muted: #7f8b9b;
+            --border-color: #e9ebed;
+            --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-body);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            line-height: 1.6;
+        }
+
+        h1, h2, h3, .logo {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-title);
+        }
+
+        /* TopCV Navigation Header */
+        header {
+            background-color: var(--bg-white);
+            border-bottom: 1px solid var(--border-color);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+        }
+
+        .nav-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0.75rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.5rem;
+            font-weight: 800;
+            color: var(--primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .logo span {
+            color: var(--text-title);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            list-style: none;
+        }
+
+        .nav-links a {
+            color: var(--text-title);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.2s;
+        }
+
+        .nav-links a:hover, .nav-links a.active {
+            color: var(--primary);
+        }
+
+        .btn-login {
+            border: 1px solid var(--primary);
+            color: var(--primary) !important;
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-login:hover {
+            background-color: rgba(0, 177, 79, 0.05);
+        }
+
+        .btn-signup {
+            background-color: var(--primary);
+            color: white !important;
+            border: 1px solid var(--primary);
+            padding: 0.5rem 1.25rem;
+            border-radius: 4px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+
+        .btn-signup:hover {
+            background-color: var(--primary-hover);
+        }
+
+        /* Search Section - TopCV Dark Green Banner */
+        .search-banner {
+            background: linear-gradient(135deg, #005a30 0%, #003a1e 100%);
+            padding: 3rem 2rem;
+            text-align: center;
+            color: white;
+        }
+
+        .search-container {
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .search-banner h1 {
+            color: white;
+            font-size: 1.75rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+        }
+
+        .filter-form {
+            background-color: var(--bg-white);
+            padding: 1.25rem;
+            border-radius: 8px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            display: grid;
+            grid-template-columns: 1fr 1fr auto auto;
+            gap: 1rem;
+            align-items: center;
+        }
+
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            text-align: left;
+            gap: 0.35rem;
+        }
+
+        .filter-group label {
+            font-size: 0.75rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--text-muted);
+        }
+
+        .filter-group select {
+            background-color: #f4f6f9;
+            border: 1px solid var(--border-color);
+            color: var(--text-title);
+            padding: 0.65rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            outline: none;
+            cursor: pointer;
+            transition: border-color 0.2s;
+            font-family: inherit;
+        }
+
+        .filter-group select:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-filter, .btn-clear {
+            padding: 0.65rem 1.5rem;
+            border-radius: 4px;
+            font-size: 0.9rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+            height: 38px;
+            margin-top: 1.25rem;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-filter {
+            background-color: var(--primary);
+            color: white;
+            border: none;
+        }
+
+        .btn-filter:hover {
+            background-color: var(--primary-hover);
+        }
+
+        .btn-clear {
+            background-color: transparent;
+            color: var(--text-body);
+            border: 1px solid var(--border-color);
+            text-decoration: none;
+        }
+
+        .btn-clear:hover {
+            background-color: #f4f6f9;
+        }
+
+        /* Guest banner */
+        .guest-alert-banner {
+            max-width: 1200px;
+            margin: 1.5rem auto 0 auto;
+            padding: 0.75rem 1.5rem;
+            background-color: #fffbeb;
+            border: 1px solid #fef3c7;
+            border-left: 4px solid #f59e0b;
+            border-radius: 4px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .guest-alert-text {
+            font-size: 0.9rem;
+            color: #b45309;
+        }
+
+        .guest-alert-text a {
+            color: #b45309;
+            font-weight: 700;
+            text-decoration: underline;
+        }
+
+        .guest-alert-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .guest-alert-actions a {
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-decoration: none;
+            padding: 0.35rem 0.85rem;
+            border-radius: 4px;
+        }
+
+        .btn-guest-login {
+            background-color: #f59e0b;
+            color: white;
+        }
+
+        .btn-guest-register {
+            border: 1px solid #f59e0b;
+            color: #f59e0b;
+        }
+
+        /* Main Listing Container */
+        .main-content {
+            max-width: 1200px;
+            margin: 2rem auto;
+            padding: 0 2rem;
+            flex-grow: 1;
+            width: 100%;
+        }
+
+        .jobs-title-section {
+            margin-bottom: 1.5rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 0.5rem;
+        }
+
+        .jobs-title-section h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            border-left: 4px solid var(--primary);
+            padding-left: 0.75rem;
+        }
+
+        /* Jobs Grid & Cards */
+        .jobs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .job-card {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            padding: 1.5rem;
+            transition: all 0.3s;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            position: relative;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.01);
+            border-left: 3px solid transparent;
+        }
+
+        .job-card:hover {
+            transform: translateY(-3px);
+            border-left-color: var(--primary);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.05);
+            border-top-color: #cbd5e1;
+            border-right-color: #cbd5e1;
+            border-bottom-color: #cbd5e1;
+        }
+
+        .job-header {
+            margin-bottom: 1rem;
+        }
+
+        .job-title {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            line-height: 1.35;
+        }
+
+        .job-title a {
+            color: var(--text-title);
+            text-decoration: none;
+            transition: color 0.2s;
+        }
+
+        .job-title a:hover {
+            color: var(--primary);
+        }
+
+        .job-badges {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .badge {
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+        }
+
+        .badge-dept {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .badge-loc {
+            background-color: #f1f5f9;
+            color: #475569;
+        }
+
+        .salary-text {
+            color: var(--primary);
+            font-weight: 700;
+            font-size: 1rem;
+            margin-bottom: 0.75rem;
+        }
+
+        .job-meta {
+            font-size: 0.825rem;
+            color: var(--text-muted);
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+            margin-top: auto;
+            padding-top: 1rem;
+            border-top: 1px dashed var(--border-color);
+        }
+
+        .btn-view {
+            display: inline-block;
+            text-align: center;
+            padding: 0.5rem;
+            border: 1px solid var(--primary);
+            border-radius: 4px;
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.85rem;
+            margin-top: 1rem;
+            transition: all 0.2s;
+        }
+
+        .btn-view:hover {
+            background-color: var(--primary);
+            color: white;
+        }
+
+        .empty-state {
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 4rem 2rem;
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+        }
+
+        .empty-state p {
+            color: var(--text-body);
+            font-size: 1.05rem;
+            margin-bottom: 1.5rem;
+        }
+
+        /* Footer */
+        footer {
+            background-color: #172635;
+            padding: 2.5rem 2rem;
+            text-align: center;
+            color: #a0aec0;
+            font-size: 0.85rem;
+            margin-top: auto;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .filter-form {
+                grid-template-columns: 1fr;
+            }
+            .btn-filter, .btn-clear {
+                margin-top: 0;
+            }
+            .guest-alert-banner {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            .guest-alert-actions {
+                width: 100%;
+                justify-content: flex-end;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs" class="active">Việc làm</a></li>
+                    
+                    <li sec:authorize="hasRole('CANDIDATE')">
+                        <a href="/my-applications">Việc đã ứng tuyển</a>
+                    </li>
+                    
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
+                        <a href="/reports/pipeline">Nhà tuyển dụng</a>
+                    </li>
+                    
+                    <li sec:authorize="isAuthenticated()">
+                        <a href="/change-password">Thiết lập</a>
+                    </li>
+                    
+                    <li sec:authorize="!isAuthenticated()">
+                        <a href="/login" class="btn-login">Đăng nhập</a>
+                    </li>
+                    
+                    <li sec:authorize="!isAuthenticated()">
+                        <a href="/register" class="btn-signup">Đăng ký</a>
+                    </li>
+                    
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Search Banner Section -->
+    <section class="search-banner">
+        <div class="search-container">
+            <h1>Tìm việc làm nhanh 24h, tuyển dụng mới nhất</h1>
+            
+            <!-- Filters Form (SCR-13) -->
+            <form action="/jobs" method="get" class="filter-form" id="search-filter-form">
+                <div class="filter-group">
+                    <label for="department">Ngành nghề</label>
+                    <select name="department" id="department">
+                        <option value="">Tất cả ngành nghề</option>
+                        <option th:each="dept : ${departments}" 
+                                th:value="${dept}" 
+                                th:text="${dept}"
+                                th:selected="${dept == selectedDepartment}"></option>
+                    </select>
+                </div>
+                
+                <div class="filter-group">
+                    <label for="location">Địa điểm</label>
+                    <select name="location" id="location">
+                        <option value="">Tất cả địa điểm</option>
+                        <option th:each="loc : ${locations}" 
+                                th:value="${loc}" 
+                                th:text="${loc}"
+                                th:selected="${loc == selectedLocation}"></option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-filter" id="btn-filter-submit">Tìm kiếm</button>
+                <a href="/jobs" class="btn-clear" id="btn-filter-clear">Xóa lọc</a>
+            </form>
+        </div>
+    </section>
+
+    <!-- Guest Sign-in Alert Banner (SCR-13) -->
+    <div class="guest-alert-banner" sec:authorize="!isAuthenticated()" id="guest-prompt-banner">
+        <div class="guest-alert-text">
+            Chào bạn! Hãy <a href="/login">Đăng nhập</a> hoặc <a href="/register">Đăng ký tài khoản</a> ngay để có thể tải lên CV ứng tuyển và theo dõi tình trạng hồ sơ trực tiếp.
+        </div>
+        <div class="guest-alert-actions">
+            <a href="/login" class="btn-guest-login">Đăng nhập</a>
+            <a href="/register" class="btn-guest-register">Đăng ký</a>
+        </div>
+    </div>
+
+    <!-- Main Content Area -->
+    <main class="main-content">
+        
+        <div class="jobs-title-section">
+            <h2>Việc làm tốt nhất dành cho bạn</h2>
+        </div>
+
+        <!-- Job Card Grid -->
+        <div class="jobs-grid" id="jobs-container">
+            
+            <!-- Dynamic Job Card -->
+            <div class="job-card" th:each="job : ${jobs}">
+                <div class="job-header">
+                    <h3 class="job-title">
+                        <a th:href="@{/jobs/{id}(id=${job.id})}" th:text="${job.title}" th:id="'job-title-link-' + ${job.id}">Tên công việc tuyển dụng</a>
+                    </h3>
+                    <div class="job-badges">
+                        <span class="badge badge-dept" th:text="${job.department}">Ngành nghề</span>
+                        <span class="badge badge-loc" th:text="${job.location}">Địa điểm</span>
+                    </div>
+                </div>
+                
+                <!-- Display salary range prominently like TopCV -->
+                <div class="salary-text" th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange)} ? ${job.salaryRange} : 'Thỏa thuận'">
+                    10 - 15 triệu
+                </div>
+                
+                <div class="job-meta">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color: var(--text-muted);">
+                        <circle cx="12" cy="12" r="10"/>
+                        <polyline points="12 6 12 12 16 14"/>
+                    </svg>
+                    <span th:if="${job.deadline != null}" th:text="'Hạn nộp: ' + ${#temporals.format(job.deadline, 'yyyy-MM-dd')}">Hạn nộp: 2026-12-31</span>
+                    <span th:if="${job.deadline == null}">Liên hệ</span>
+                </div>
+                
+                <a th:href="@{/jobs/{id}(id=${job.id})}" class="btn-view" th:id="'btn-view-job-' + ${job.id}">Xem chi tiết</a>
+            </div>
+
+            <!-- Empty State -->
+            <div class="empty-state" th:if="${#lists.isEmpty(jobs)}" id="empty-jobs-state">
+                <p>Không có vị trí tuyển dụng nào phù hợp với bộ lọc tìm kiếm của bạn.</p>
+                <a href="/jobs" class="btn-filter" style="display:inline-block; text-decoration:none; line-height:22px; height:auto;">Đặt lại bộ lọc</a>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+</body>
+</html>
