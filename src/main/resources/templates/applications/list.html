@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Application List</title>
+    <!-- Basic styling for now -->
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+    </style>
+</head>
+<body>
+
+    <h2>Applications for Job ID: <span th:text="${jobId}"></span></h2>
+
+    <table>
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Candidate Name</th>
+                <th>Applied At</th>
+                <th>Status</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr th:each="app : ${applications}">
+                <td th:text="${app.id}"></td>
+                <td th:text="${app.candidate.user.fullName}"></td>
+                <td th:text="${#temporals.format(app.appliedAt, 'yyyy-MM-dd HH:mm')}"></td>
+                <td th:text="${app.status}"></td>
+                <td>
+                    <a th:href="@{/applications/{id}(id=${app.id})}">View Details</a>
+                </td>
+            </tr>
+            <tr th:if="${#lists.isEmpty(applications)}">
+                <td colspan="5">No applications found for this job.</td>
+            </tr>
+        </tbody>
+    </table>
+
+</body>
+</html>

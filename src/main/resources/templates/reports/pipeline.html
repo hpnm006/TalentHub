@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Pipeline Report</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .report-container { max-width: 800px; margin: auto; }
+        .stat-box { 
+            display: inline-block; 
+            width: 30%; 
+            margin: 1%; 
+            padding: 20px; 
+            border: 1px solid #ddd; 
+            border-radius: 5px; 
+            text-align: center; 
+            background-color: #f9f9f9; 
+            box-sizing: border-box;
+        }
+        .stat-box h3 { margin-top: 0; color: #555; font-size: 1.2em; }
+        .stat-box p { font-size: 2em; font-weight: bold; margin: 0; color: #333; }
+        .rates { margin-top: 30px; padding: 20px; background-color: #eef; border-radius: 5px; }
+    </style>
+</head>
+<body>
+
+    <div class="report-container">
+        <h2>Recruitment Pipeline Report</h2>
+
+        <div>
+            <div class="stat-box">
+                <h3>Total Applications</h3>
+                <p th:text="${report.totalApplied}"></p>
+            </div>
+            <div class="stat-box">
+                <h3>New</h3>
+                <p th:text="${report.newCount}"></p>
+            </div>
+            <div class="stat-box">
+                <h3>Reviewing</h3>
+                <p th:text="${report.reviewingCount}"></p>
+            </div>
+            <div class="stat-box">
+                <h3>Interviewing</h3>
+                <p th:text="${report.interviewCount}"></p>
+            </div>
+            <div class="stat-box">
+                <h3>Offers Extended</h3>
+                <p th:text="${report.offerCount}"></p>
+            </div>
+            <div class="stat-box">
+                <h3>Hired</h3>
+                <p th:text="${report.hiredCount}"></p>
+            </div>
+            <div class="stat-box" style="background-color: #fee;">
+                <h3>Rejected</h3>
+                <p th:text="${report.rejectedCount}"></p>
+            </div>
+        </div>
+
+        <div class="rates">
+            <h3>Conversion Rates</h3>
+            <p><strong>Application to Interview Rate:</strong> 
+               <span th:text="${#numbers.formatDecimal(report.interviewRate, 1, 2)}"></span>%
+            </p>
+            <p><strong>Application to Hire Rate (Success Rate):</strong> 
+               <span th:text="${#numbers.formatDecimal(report.hireRate, 1, 2)}"></span>%
+            </p>
+        </div>
+    </div>
+
+</body>
+</html>

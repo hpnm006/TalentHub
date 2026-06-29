@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Assign Interview</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .form-container { max-width: 500px; border: 1px solid #ddd; padding: 20px; border-radius: 5px; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: bold; }
+        .form-group input, .form-group textarea, .form-group select { width: 100%; padding: 8px; box-sizing: border-box; }
+        .btn { padding: 10px 15px; background-color: #4CAF50; color: white; border: none; cursor: pointer; border-radius: 4px; }
+        .btn:hover { background-color: #45a049; }
+        .btn-cancel { background-color: #f44336; margin-left: 10px; text-decoration: none; display: inline-block;}
+    </style>
+</head>
+<body>
+
+    <h2>Schedule Interview</h2>
+    <p>For candidate: <strong th:text="${application.candidate.user.fullName}"></strong> 
+       (Job: <span th:text="${application.job.title}"></span>)</p>
+
+    <div class="form-container">
+        <form th:action="@{/interviews/assign/{id}(id=${application.id})}" method="post">
+            <div class="form-group">
+                <label for="interviewerId">Select Interviewer (Mocking ID for now):</label>
+                <!-- In reality this would be a select dropdown from UserService -->
+                <input type="number" id="interviewerId" name="interviewerId" value="1" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="scheduledAt">Date and Time:</label>
+                <!-- use datetime-local to get ISO format string easily -->
+                <input type="datetime-local" id="scheduledAt" name="scheduledAt" required>
+            </div>
+
+            <div class="form-group">
+                <label for="linkOrLocation">Location / Meeting Link:</label>
+                <input type="text" id="linkOrLocation" name="linkOrLocation" placeholder="e.g. Zoom link or Room 101" required>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes for Interviewer:</label>
+                <textarea id="notes" name="notes" rows="4"></textarea>
+            </div>
+
+            <button type="submit" class="btn">Schedule Interview</button>
+            <a th:href="@{/applications/{id}(id=${application.id})}" class="btn btn-cancel">Cancel</a>
+        </form>
+    </div>
+
+</body>
+</html>
