@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trang quản trị tuyển dụng - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Specific CSS rules for HR Dashboard grid */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+        .stat-card {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            box-shadow: var(--card-shadow);
+            border-left: 4px solid var(--border-color);
+        }
+        .stat-card-active {
+            border-left-color: var(--primary);
+        }
+        .stat-card-applied {
+            border-left-color: #0284c7;
+        }
+        .stat-card-interview {
+            border-left-color: #7c3aed;
+        }
+        .stat-info {
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        .stat-title {
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+        .stat-number {
+            font-size: 2.25rem;
+            font-weight: 800;
+            color: var(--text-title);
+            line-height: 1;
+        }
+        .stat-icon-wrapper {
+            background-color: #f8fafc;
+            border-radius: 50%;
+            padding: 0.75rem;
+            color: var(--text-muted);
+        }
+        .stat-card-active .stat-icon-wrapper {
+            background-color: rgba(0, 177, 79, 0.08);
+            color: var(--primary);
+        }
+        .stat-card-applied .stat-icon-wrapper {
+            background-color: rgba(2, 132, 199, 0.08);
+            color: #0284c7;
+        }
+        .stat-card-interview .stat-icon-wrapper {
+            background-color: rgba(124, 58, 237, 0.08);
+            color: #7c3aed;
+        }
+        .dashboard-welcome {
+            background: linear-gradient(135deg, #005a30 0%, #003a1e 100%);
+            border-radius: 8px;
+            padding: 2rem;
+            color: white;
+            margin-bottom: 2.5rem;
+            box-shadow: 0 4px 15px rgba(0, 90, 48, 0.1);
+        }
+        .dashboard-welcome h2 {
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+        .dashboard-welcome p {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 0.95rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    <li sec:authorize="hasRole('CANDIDATE')"><a href="/my-applications">Việc đã ứng tuyển</a></li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')"><a href="/dashboard" class="active">Nhà tuyển dụng</a></li>
+                    <li sec:authorize="isAuthenticated()"><a href="/change-password">Thiết lập</a></li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Recruiter Welcome message -->
+        <div class="dashboard-welcome" id="recruiter-welcome-banner">
+            <h2 th:text="'Xin chào, ' + ${#authentication.principal.user.fullName} + '!'">Xin chào, Nhà tuyển dụng!</h2>
+            <p>Chào mừng quay trở lại hệ thống quản trị tuyển dụng TalentHub. Đây là các số liệu thống kê công việc của bạn.</p>
+        </div>
+
+        <!-- Thống kê đếm thẻ (SCR-06) -->
+        <div class="dashboard-grid" id="dashboard-metrics-row">
+            
+            <!-- Card 1: Active Jobs -->
+            <div class="stat-card stat-card-active">
+                <div class="stat-info">
+                    <span class="stat-title">Tin đang hoạt động</span>
+                    <span class="stat-number" th:text="${activeJobsCount}">0</span>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <rect x="2" y="7" width="20" height="14" rx="2"/>
+                        <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 2: New Applications waiting for review -->
+            <div class="stat-card stat-card-applied">
+                <div class="stat-info">
+                    <span class="stat-title">Hồ sơ mới chờ duyệt</span>
+                    <span class="stat-number" th:text="${newApplicationsCount}">0</span>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                        <polyline points="14 2 14 8 20 8"/>
+                        <line x1="16" y1="13" x2="8" y2="13"/>
+                        <line x1="16" y1="17" x2="8" y2="17"/>
+                        <polyline points="10 9 9 9 8 9"/>
+                    </svg>
+                </div>
+            </div>
+
+            <!-- Card 3: Upcoming 7-day Interviews -->
+            <div class="stat-card stat-card-interview">
+                <div class="stat-info">
+                    <span class="stat-title">Phỏng vấn (7 ngày tới)</span>
+                    <span class="stat-number" th:text="${upcomingInterviewsCount}">0</span>
+                </div>
+                <div class="stat-icon-wrapper">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"/>
+                        <line x1="16" y1="2" x2="16" y2="6"/>
+                        <line x1="8" y1="2" x2="8" y2="6"/>
+                        <line x1="3" y1="10" x2="21" y2="10"/>
+                    </svg>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Bảng danh sách bài đăng active của riêng HR đó (SCR-06) -->
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1.25rem;">
+            <h2 class="section-title" style="margin:0;">Các bài đăng đang hoạt động của bạn</h2>
+            <a href="/hr/jobs" class="btn-login" style="text-decoration:none; font-size:0.85rem; font-weight:700;">Xem toàn bộ tin tuyển dụng</a>
+        </div>
+
+        <div class="applications-card">
+            <table th:if="${not #lists.isEmpty(activeJobs)}" id="active-jobs-dashboard-table">
+                <thead>
+                    <tr>
+                        <th>Tên tin tuyển dụng</th>
+                        <th>Phòng ban</th>
+                        <th>Địa điểm</th>
+                        <th>Hạn nộp hồ sơ</th>
+                        <th>Hành động</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="job : ${activeJobs}">
+                        <td>
+                            <a th:href="@{/hr/jobs/detail/{id}(id=${job.id})}" class="job-title-link" th:text="${job.title}">Senior Engineer</a>
+                        </td>
+                        <td th:text="${job.department}">Công nghệ thông tin</td>
+                        <td th:text="${job.location}">Hà Nội</td>
+                        <td class="dept-txt" th:text="${job.deadline != null} ? ${#temporals.format(job.deadline, 'yyyy-MM-dd')} : 'Không giới hạn'">2026-12-31</td>
+                        <td>
+                            <a th:href="@{/hr/jobs/detail/{id}(id=${job.id})}" class="btn-table-action btn-table-edit" style="color: var(--primary); border-color: var(--primary);">Xem chi tiết</a>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty state for active jobs -->
+            <div class="empty-state" th:if="${#lists.isEmpty(activeJobs)}" id="empty-active-jobs-container">
+                <p>Bạn hiện không có bài đăng nào đang hoạt động (ACTIVE).</p>
+                <a href="/hr/jobs/new" class="btn-browse">Tạo bài đăng ngay</a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+</body>
+</html>

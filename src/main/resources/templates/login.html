@@ -167,6 +167,24 @@
 
         }
 
+        .success{
+
+            background:#d1e7dd;
+
+            color:#0f5132;
+
+            border:1px solid #badbcc;
+
+            padding:10px;
+
+            border-radius:6px;
+
+            margin-bottom:15px;
+
+            text-align:center;
+
+        }
+
     </style>
 
 </head>
@@ -180,8 +198,18 @@
 
     <h2>User Login to TalentHub</h2>
 
+    <div class="success"
+         th:if="${success}"
+         th:text="${success}">
+    </div>
+
     <div th:if="${param.error}" class="error">
         Incorrect username or password.
+    </div>
+
+    <div th:if="${param.locked}" class="error">
+        Your account has been temporarily locked after too many failed attempts.
+        Please try again in 10 minutes.
     </div>
 
     <form th:action="@{/login}" method="post">
@@ -230,7 +258,7 @@
         |
 
         <a th:href="@{/forgot-password}">
-            Forgot password ?
+            Forgot password?
         </a>
 
     </div>
@@ -262,7 +290,5 @@
 
 </script>
 
-</body>
-</html>
 </body>
 </html>

@@ -1,0 +1,299 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quản lý tin tuyển dụng - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+    <style>
+        /* Specific page additions on top of global stylesheet */
+        .btn-create {
+            background-color: var(--primary);
+            color: white !important;
+            padding: 0.6rem 1.25rem;
+            border-radius: 4px;
+            text-decoration: none;
+            font-weight: 700;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            box-shadow: var(--button-shadow);
+        }
+        .btn-create:hover {
+            background-color: var(--primary-hover);
+        }
+        .btn-table-action {
+            padding: 0.35rem 0.75rem;
+            border-radius: 4px;
+            font-size: 0.825rem;
+            font-weight: 700;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-block;
+            border: 1px solid var(--border-color);
+            background-color: white;
+            color: var(--text-body);
+        }
+        .btn-table-edit:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            background-color: rgba(0, 177, 79, 0.05);
+        }
+        .btn-table-publish {
+            border-color: var(--primary);
+            color: white;
+            background-color: var(--primary);
+        }
+        .btn-table-publish:hover {
+            background-color: var(--primary-hover);
+            border-color: var(--primary-hover);
+        }
+        .btn-table-close {
+            border-color: #f59e0b;
+            color: #d97706;
+            background-color: #fffbeb;
+        }
+        .btn-table-close:hover {
+            background-color: #f59e0b;
+            color: white;
+            border-color: #f59e0b;
+        }
+        .btn-table-delete {
+            border-color: #fca5a5;
+            color: #b91c1c;
+            background-color: #fef2f2;
+        }
+        .btn-table-delete:hover {
+            background-color: #ef4444;
+            color: white;
+            border-color: #ef4444;
+        }
+        .tab-badge {
+            background-color: rgba(0,0,0,0.06);
+            color: var(--text-body);
+            border-radius: 10px;
+            padding: 0.1rem 0.5rem;
+            font-size: 0.75rem;
+            margin-left: 0.35rem;
+            font-weight: 700;
+        }
+        .tab-item.active .tab-badge {
+            background-color: rgba(255,255,255,0.3);
+            color: white;
+        }
+        .search-row {
+            background-color: var(--bg-white);
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            padding: 1.25rem;
+            margin-bottom: 2rem;
+            box-shadow: var(--card-shadow);
+        }
+        .search-form-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+        }
+        .search-form-input {
+            flex-grow: 1;
+            min-width: 250px;
+        }
+        .search-form-select {
+            min-width: 200px;
+        }
+        .header-action-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    <li sec:authorize="hasRole('CANDIDATE')"><a href="/my-applications">Việc đã ứng tuyển</a></li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')"><a href="/dashboard" class="active">Nhà tuyển dụng</a></li>
+                    <li sec:authorize="isAuthenticated()"><a href="/change-password">Thiết lập</a></li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="main-content">
+
+        <!-- Top row with title and Add button -->
+        <div class="header-action-row">
+            <h1 class="page-title" style="margin-bottom:0;">Quản lý tin tuyển dụng</h1>
+            <a href="/hr/jobs/new" class="btn-create" id="btn-create-new-job">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                    <line x1="12" y1="5" x2="12" y2="19"/>
+                    <line x1="5" y1="12" x2="19" y2="12"/>
+                </svg>
+                Tạo bài tuyển dụng
+            </a>
+        </div>
+
+        <!-- Flash messages -->
+        <div th:if="${success}" class="alert alert-success" id="success-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span th:text="${success}">Success message</span>
+        </div>
+        <div th:if="${error}" class="alert alert-error" id="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span th:text="${error}">Error message</span>
+        </div>
+
+        <!-- Search & Filter Area (SCR-10) -->
+        <div class="search-row">
+            <form action="/hr/jobs" method="get" class="search-form-row" id="job-search-filter-form">
+                <input type="hidden" name="status" th:value="${selectedStatus}"/>
+                
+                <div class="filter-group search-form-input">
+                    <label for="keyword">Từ khóa tìm kiếm</label>
+                    <input type="text" name="keyword" id="keyword" class="form-control" th:value="${keyword}" placeholder="Nhập tên tin tuyển dụng cần tìm..."/>
+                </div>
+                
+                <div class="filter-group search-form-select">
+                    <label for="department">Phòng ban</label>
+                    <select name="department" id="department" class="form-control">
+                        <option value="">Tất cả phòng ban</option>
+                        <option th:each="dept : ${departments}" 
+                                th:value="${dept}" 
+                                th:text="${dept}"
+                                th:selected="${dept == selectedDepartment}"></option>
+                    </select>
+                </div>
+                
+                <button type="submit" class="btn-filter" style="margin-top: 1.25rem;">Tìm kiếm</button>
+                <a th:href="@{/hr/jobs(status=${selectedStatus})}" class="btn-clear" style="margin-top: 1.25rem;">Xóa lọc</a>
+            </form>
+        </div>
+
+        <!-- Status Filter Tabs (SCR-10) -->
+        <div class="tabs-bar" id="status-tabs-container">
+            <a th:href="@{/hr/jobs(status='ALL', keyword=${keyword}, department=${selectedDepartment})}" 
+               class="tab-item" th:classappend="${selectedStatus == 'ALL'} ? 'active'">
+                Tất cả <span class="tab-badge" th:text="${allCount}">0</span>
+            </a>
+            <a th:href="@{/hr/jobs(status='DRAFT', keyword=${keyword}, department=${selectedDepartment})}" 
+               class="tab-item" th:classappend="${selectedStatus == 'DRAFT'} ? 'active'">
+                Bản nháp <span class="tab-badge" th:text="${draftCount}">0</span>
+            </a>
+            <a th:href="@{/hr/jobs(status='ACTIVE', keyword=${keyword}, department=${selectedDepartment})}" 
+               class="tab-item" th:classappend="${selectedStatus == 'ACTIVE'} ? 'active'">
+                Đang tuyển <span class="tab-badge" th:text="${activeCount}">0</span>
+            </a>
+            <a th:href="@{/hr/jobs(status='CLOSED', keyword=${keyword}, department=${selectedDepartment})}" 
+               class="tab-item" th:classappend="${selectedStatus == 'CLOSED'} ? 'active'">
+                Đã đóng <span class="tab-badge" th:text="${closedCount}">0</span>
+            </a>
+        </div>
+
+        <!-- Jobs Listing Grid -->
+        <div class="applications-card">
+            <table th:if="${not #lists.isEmpty(jobs)}" id="jobs-management-table">
+                <thead>
+                    <tr>
+                        <th>Tên bài đăng</th>
+                        <th>Phòng ban</th>
+                        <th>Địa điểm</th>
+                        <th>Hạn nộp hồ sơ</th>
+                        <th>Trạng thái</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="job : ${jobs}">
+                        <td>
+                            <a th:href="@{/hr/jobs/detail/{id}(id=${job.id})}" class="job-title-link" th:text="${job.title}">Senior Developer</a>
+                            <br/>
+                            <small class="dept-txt" th:if="${job.createdBy != null}" th:text="'Tạo bởi: ' + ${job.createdBy.fullName}">Tạo bởi: HR</small>
+                        </td>
+                        <td th:text="${job.department}">Công nghệ thông tin</td>
+                        <td th:text="${job.location}">Hà Nội</td>
+                        <td class="dept-txt" th:text="${job.deadline != null} ? ${#temporals.format(job.deadline, 'yyyy-MM-dd')} : 'Không giới hạn'">2026-12-31</td>
+                        <td>
+                            <!-- Status Badges mapped directly from JobStatus enum -->
+                            <span class="status-badge" 
+                                  th:classappend="'status-' + ${#strings.toLowerCase(job.status.name())}"
+                                  th:text="${job.status.name() == 'DRAFT' ? 'Bản nháp' : (job.status.name() == 'ACTIVE' ? 'Đang tuyển' : 'Đã đóng')}">DRAFT</span>
+                        </td>
+                        <td>
+                            <div style="display:flex; gap:0.5rem; align-items:center;">
+                                
+                                <!-- Edit: allowed for DRAFT/ACTIVE. CLOSED will be locked read-only in form -->
+                                <a th:href="@{/hr/jobs/edit/{id}(id=${job.id})}" 
+                                   class="btn-table-action btn-table-edit" 
+                                   th:id="'btn-edit-job-' + ${job.id}">
+                                   <span th:text="${job.status.name() == 'CLOSED'} ? 'Xem' : 'Sửa'">Sửa</span>
+                                </a>
+
+                                <!-- Publish: DRAFT -> ACTIVE -->
+                                <form th:if="${job.status.name() == 'DRAFT'}" th:action="@{/hr/jobs/{id}/publish(id=${job.id})}" method="post" style="display:inline;">
+                                    <button type="submit" class="btn-table-action btn-table-publish" th:id="'btn-publish-job-' + ${job.id}">Đăng tuyển</button>
+                                </form>
+
+                                <!-- Close: ACTIVE -> CLOSED -->
+                                <form th:if="${job.status.name() == 'ACTIVE'}" th:action="@{/hr/jobs/{id}/close(id=${job.id})}" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc chắn muốn đóng tin tuyển dụng này?');">
+                                    <button type="submit" class="btn-table-action btn-table-close" th:id="'btn-close-job-' + ${job.id}">Đóng tin</button>
+                                </form>
+
+                                <!-- Delete: Only allowed for DRAFT -->
+                                <form th:if="${job.status.name() == 'DRAFT'}" th:action="@{/hr/jobs/{id}/delete(id=${job.id})}" method="post" style="display:inline;" onsubmit="return confirm('Bạn có chắc muốn xóa tin tuyển dụng nháp này không?');">
+                                    <button type="submit" class="btn-table-action btn-table-delete" th:id="'btn-delete-job-' + ${job.id}">Xóa</button>
+                                </form>
+                                
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty state -->
+            <div class="empty-state" th:if="${#lists.isEmpty(jobs)}" id="empty-state-container">
+                <p>Không tìm thấy bài đăng tuyển dụng nào.</p>
+                <a href="/hr/jobs/new" class="btn-browse">Tạo bài đăng ngay</a>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+</body>
+</html>

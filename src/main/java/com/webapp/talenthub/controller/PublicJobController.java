@@ -68,7 +68,7 @@ public class PublicJobController {
         model.addAttribute("job", job);
         model.addAttribute("hasApplied", hasApplied);
         model.addAttribute("isCandidate", isCandidate);
-        model.addAttribute("isClosed", !"ACTIVE".equals(job.getStatus()));
+        model.addAttribute("isClosed", job.getStatus() != com.webapp.talenthub.entity.JobStatus.ACTIVE);
 
         return "jobs/public-detail";
     }

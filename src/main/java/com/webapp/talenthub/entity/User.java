@@ -37,6 +37,8 @@ public class User {
     @Column(length = 10)
     private String resetCode;
 
+    private Long resetCodeExpiry;
+
     public User() {
     }
 
@@ -49,7 +51,8 @@ public class User {
                 Boolean enabled,
                 Integer failedAttempts,
                 Long lockTime,
-                String resetCode) {
+                String resetCode,
+                Long resetCodeExpiry) {
 
         this.id = id;
         this.fullName = fullName;
@@ -61,6 +64,7 @@ public class User {
         this.failedAttempts = failedAttempts;
         this.lockTime = lockTime;
         this.resetCode = resetCode;
+        this.resetCodeExpiry = resetCodeExpiry;
     }
 
     public Long getId() {
@@ -141,5 +145,13 @@ public class User {
 
     public void setResetCode(String resetCode) {
         this.resetCode = resetCode;
+    }
+
+    public Long getResetCodeExpiry() {
+        return resetCodeExpiry;
+    }
+
+    public void setResetCodeExpiry(Long resetCodeExpiry) {
+        this.resetCodeExpiry = resetCodeExpiry;
     }
 }

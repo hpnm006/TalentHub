@@ -29,7 +29,7 @@
                         <a href="/my-applications">Việc đã ứng tuyển</a>
                     </li>
                     <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
-                        <a href="/reports/pipeline">Nhà tuyển dụng</a>
+                        <a href="/dashboard">Nhà tuyển dụng</a>
                     </li>
                     <li sec:authorize="isAuthenticated()">
                         <a href="/change-password">Thiết lập</a>

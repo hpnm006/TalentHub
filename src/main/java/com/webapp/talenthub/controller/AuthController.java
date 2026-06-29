@@ -11,6 +11,7 @@ import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 
 @Controller
 public class AuthController {
@@ -40,16 +41,51 @@ public class AuthController {
     @PostMapping("/register")
     public String register(
             @ModelAttribute RegisterRequest registerRequest,
-            Model model) {
+            Model model, RedirectAttributes redirectAttributes) {
 
         String result = authService.register(registerRequest);
 
         if ("success".equals(result)) {
+
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Account created successfully. Please sign in.");
+
             return "redirect:/login";
         }
 
-        model.addAttribute("error", result);
         model.addAttribute("registerRequest", registerRequest);
+
+        switch (result) {
+
+            // Full Name
+            case "Full name must contain at least 2 characters.":
+            case "Full name contains invalid characters.":
+                model.addAttribute("fullNameError", result);
+                break;
+
+            // Username
+            case "Username already exists":
+            case "Username must be between 4 and 50 characters.":
+            case "Username can only contain letters, numbers and underscore.":
+                model.addAttribute("usernameError", result);
+                break;
+
+            // Email
+            case "Email already exists":
+                model.addAttribute("emailError", result);
+                break;
+
+            // Confirm Password
+            case "Passwords do not match":
+                model.addAttribute("confirmPasswordError", result);
+                break;
+
+            // Password
+            default:
+                model.addAttribute("passwordError", result);
+                break;
+        }
 
         return "register";
     }
@@ -74,15 +110,17 @@ public class AuthController {
 
         String result = authService.forgotPassword(request);
 
-        if ("Email does not exist".equals(result)) {
+        if ("success".equals(result)) {
 
-            model.addAttribute("message", result);
+            model.addAttribute("message",
+                    "If an account with this email exists, a reset code has been sent.");
 
-            return "forgot-password";
+        } else {
+
+            model.addAttribute("message",
+                    "Reset Code: " + result);
+
         }
-
-        model.addAttribute("message",
-                "Reset Code: " + result);
 
         return "forgot-password";
     }
@@ -103,23 +141,24 @@ public class AuthController {
     @PostMapping("/reset-password")
     public String resetPassword(
             @ModelAttribute ResetPasswordRequest request,
-            Model model) {
+            Model model,
+            RedirectAttributes redirectAttributes) {
 
         String result = authService.resetPassword(request);
 
         if ("success".equals(result)) {
 
-            model.addAttribute("success",
-                    "Password reset successfully.");
+            redirectAttributes.addFlashAttribute(
+                    "success",
+                    "Password has been reset successfully. Please sign in.");
 
             return "redirect:/login";
-
-        } else {
-
-            model.addAttribute("error", result);
-
-            return "reset-password";
         }
+
+        model.addAttribute("error", result);
+        model.addAttribute("resetPasswordRequest", request);
+
+        return "reset-password";
     }
 
     // ===========================
