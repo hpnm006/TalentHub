@@ -1,21 +1,160 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
 <head>
     <meta charset="UTF-8">
-    <title>TalentHub</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Chào mừng bạn đến với TalentHub - Nền tảng kết nối ứng viên và nhà tuyển dụng hàng đầu.">
+    <title>TalentHub - Nền tảng kết nối việc làm và tuyển dụng</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
-
 <body>
 
-<h1>Welcome to TalentHub</h1>
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    
+                    <li sec:authorize="hasRole('CANDIDATE')">
+                        <a href="/my-applications">Việc đã ứng tuyển</a>
+                    </li>
+                    
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
+                        <a href="/reports/pipeline">Nhà tuyển dụng</a>
+                    </li>
+                    
+                    <li sec:authorize="isAuthenticated()">
+                        <a href="/change-password">Thiết lập</a>
+                    </li>
+                    
+                    <li sec:authorize="!isAuthenticated()">
+                        <a href="/login" class="btn-login">Đăng nhập</a>
+                    </li>
+                    
+                    <li sec:authorize="!isAuthenticated()">
+                        <a href="/register" class="btn-signup">Đăng ký</a>
+                    </li>
+                    
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem; transition:color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-title)'">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
 
-<h2>Login Successfully</h2>
+    <!-- Hero Banner Section -->
+    <main class="hero-banner">
+        <div class="hero-content">
+            <div th:if="${#authorization.expression('isAuthenticated()')}" style="font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem;" th:text="'Xin chào, ' + ${#authentication.principal.user.fullName}">Xin chào</div>
+            <h1>Tìm việc làm mơ ước cùng <span>TalentHub</span></h1>
+            <p>Kết nối ứng viên tài năng với các nhà tuyển dụng hàng đầu. Tìm việc phù hợp và theo dõi quy trình ứng tuyển hoàn chỉnh.</p>
+            <a href="/jobs" class="btn-cta">Tìm việc ngay</a>
+        </div>
+    </main>
 
-<p>You have logged in successfully.</p>
+    <!-- Features Container -->
+    <div class="features-container">
+        <div class="features-grid">
+            
+            <!-- Card 1: Job Search -->
+            <a href="/jobs" class="feature-card" id="home-card-search">
+                <div>
+                    <div class="icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="11" cy="11" r="8"/>
+                            <line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Việc làm công khai</h3>
+                    <p class="card-desc">Tìm kiếm hàng trăm cơ hội việc làm hấp dẫn theo bộ lọc ngành nghề, địa điểm và mức lương.</p>
+                </div>
+                <span class="card-link">Xem việc làm &raquo;</span>
+            </a>
 
-<a th:href="@{/logout}">
-    Logout
-</a>
+            <!-- Card 2: Candidate Applications (Candidate view) / Sign up (Guest view) -->
+            <a href="/my-applications" sec:authorize="hasRole('CANDIDATE')" class="feature-card" id="home-card-candidate">
+                <div>
+                    <div class="icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+                            <polyline points="14 2 14 8 20 8"/>
+                            <line x1="16" y1="13" x2="8" y2="13"/>
+                            <line x1="16" y1="17" x2="8" y2="17"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Hồ sơ ứng tuyển</h3>
+                    <p class="card-desc">Quản lý và cập nhật tiến độ các đơn ứng tuyển, chuẩn bị lịch phỏng vấn và nhận đánh giá từ công ty.</p>
+                </div>
+                <span class="card-link">Theo dõi hồ sơ &raquo;</span>
+            </a>
+
+            <a href="/register" sec:authorize="!isAuthenticated()" class="feature-card" id="home-card-register">
+                <div>
+                    <div class="icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M16 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/>
+                            <circle cx="8.5" cy="7" r="4"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Tạo CV &amp; Ứng tuyển</h3>
+                    <p class="card-desc">Đăng ký tài khoản ứng viên để tải hồ sơ lên và bắt đầu nộp đơn vào các tin tuyển dụng đang hoạt động.</p>
+                </div>
+                <span class="card-link">Tạo tài khoản &raquo;</span>
+            </a>
+
+            <!-- Card 3: Recruiter Dashboard -->
+            <a href="/reports/pipeline" sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')" class="feature-card" id="home-card-recruiter">
+                <div>
+                    <div class="icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="18" y1="20" x2="18" y2="10"/>
+                            <line x1="12" y1="20" x2="12" y2="4"/>
+                            <line x1="6" y1="20" x2="6" y2="14"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Cổng tuyển dụng</h3>
+                    <p class="card-desc">Xem thống kê phễu tuyển dụng, quản lý quy trình, phân lịch phỏng vấn và đánh giá ứng viên hiệu quả.</p>
+                </div>
+                <span class="card-link">Vào trang quản lý &raquo;</span>
+            </a>
+
+            <!-- Card 4: Change Password / Settings -->
+            <a href="/change-password" sec:authorize="isAuthenticated()" class="feature-card" id="home-card-settings">
+                <div>
+                    <div class="icon-box">
+                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="3"/>
+                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                        </svg>
+                    </div>
+                    <h3 class="card-title">Đổi mật khẩu</h3>
+                    <p class="card-desc">Cập nhật mật khẩu mới cho tài khoản của bạn để đảm bảo an toàn bảo mật thông tin.</p>
+                </div>
+                <span class="card-link">Thay đổi ngay &raquo;</span>
+            </a>
+
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
 
 </body>
 </html>

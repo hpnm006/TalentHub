@@ -24,7 +24,7 @@
         <p><strong>Applied At:</strong> <span th:text="${#temporals.format(application.appliedAt, 'yyyy-MM-dd HH:mm')}"></span></p>
         
         <p><strong>CV:</strong> 
-            <a th:if="${application.cvUrl != null}" th:href="${application.cvUrl}" target="_blank">Download CV</a>
+            <a th:if="${application.cvUrl != null}" th:href="@{/applications/{id}/cv(id=${application.id})}" target="_blank">Download CV</a>
             <span th:if="${application.cvUrl == null}">No CV uploaded</span>
         </p>
         

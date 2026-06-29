@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title th:text="${job.title} + ' - TalentHub'">Chi tiết tuyển dụng - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    <li sec:authorize="hasRole('CANDIDATE')">
+                        <a href="/my-applications">Việc đã ứng tuyển</a>
+                    </li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
+                        <a href="/reports/pipeline">Nhà tuyển dụng</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <a href="/change-password">Thiết lập</a>
+                    </li>
+                    <li sec:authorize="!isAuthenticated()">
+                        <a href="/login" class="btn-login">Đăng nhập</a>
+                    </li>
+                    <li sec:authorize="!isAuthenticated()">
+                        <a href="/register" class="btn-signup">Đăng ký</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        
+        <!-- Back Link -->
+        <a href="/jobs" class="back-link" id="btn-back-jobs">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <line x1="19" y1="12" x2="5" y2="12"/>
+                <polyline points="12 19 5 12 12 5"/>
+            </svg>
+            Quay lại danh sách việc làm
+        </a>
+
+        <!-- Flash Messages -->
+        <div th:if="${success}" class="alert alert-success" id="success-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <polyline points="20 6 9 17 4 12"/>
+            </svg>
+            <span th:text="${success}">Nộp hồ sơ thành công</span>
+        </div>
+        <div th:if="${error}" class="alert alert-error" id="error-banner">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="12" cy="12" r="10"/>
+                <line x1="12" y1="8" x2="12" y2="12"/>
+                <line x1="12" y1="16" x2="12.01" y2="16"/>
+            </svg>
+            <span th:text="${error}">Lỗi ứng tuyển</span>
+        </div>
+
+        <!-- Job Detail Card -->
+        <div class="job-detail-card">
+            
+            <h1 class="job-title" th:text="${job.title}">Tên vị trí công việc cần tuyển dụng</h1>
+            
+            <div class="job-meta-row">
+                <span class="badge badge-dept" th:text="${job.department}">Ngành nghề</span>
+                <span class="badge badge-loc" th:text="${job.location}">Địa điểm</span>
+                <span class="salary-txt-prominent" th:text="${job.salaryRange != null && !#strings.isEmpty(job.salaryRange)} ? ${job.salaryRange} : 'Lương thỏa thuận'">Lương thỏa thuận</span>
+                <span class="badge badge-deadline" th:if="${job.deadline != null}" th:text="'Hạn nộp: ' + ${#temporals.format(job.deadline, 'yyyy-MM-dd')}">Hạn nộp: 2026-12-31</span>
+            </div>
+
+            <h2 class="section-title">Chi tiết công việc</h2>
+            <div class="rich-text" th:text="${job.description}">Mô tả nội dung công việc...</div>
+
+            <div th:if="${job.requirements != null && !#strings.isEmpty(job.requirements)}">
+                <h2 class="section-title">Yêu cầu ứng viên</h2>
+                <div class="rich-text" th:text="${job.requirements}">Các yêu cầu kinh nghiệm, kỹ năng...</div>
+            </div>
+
+            <!-- Application Action Box (SCR-14) -->
+            <div class="apply-section" id="application-area">
+                
+                <!-- GUEST View: Prompt to sign in -->
+                <div sec:authorize="!isAuthenticated()" class="status-banner status-banner-guest" id="guest-apply-banner">
+                    Vui lòng <a href="/login">Đăng nhập</a> hoặc <a href="/register">Tạo tài khoản ứng viên</a> để nộp đơn ứng tuyển công việc này.
+                </div>
+
+                <!-- AUTHENTICATED CANDIDATE View -->
+                <div sec:authorize="isAuthenticated()" th:if="${isCandidate}">
+                    
+                    <!-- Scenario 1: Already Applied -->
+                    <div th:if="${hasApplied}" class="status-banner status-banner-applied" id="already-applied-banner">
+                        Bạn đã ứng tuyển thành công vị trí này. Theo dõi tình trạng trong mục <a href="/my-applications">Hồ sơ đã nộp</a>.
+                    </div>
+
+                    <!-- Scenario 2: Position Closed -->
+                    <div th:if="${isClosed && !hasApplied}" class="status-banner status-banner-closed" id="job-closed-banner">
+                        Vị trí tuyển dụng này đã đóng, hiện tại không nhận thêm hồ sơ.
+                    </div>
+
+                    <!-- Scenario 3: Open for Applications (Form) -->
+                    <div th:if="${!hasApplied && !isClosed}" id="apply-form-container">
+                        <h3 class="apply-title">Ứng tuyển nhanh vị trí này</h3>
+                        <p class="apply-subtitle">Điền thông tin và đính kèm CV (Resume) của bạn ở định dạng PDF/DOCX (tối đa 5MB) dưới đây.</p>
+                        
+                        <form th:action="@{/jobs/{id}/apply(id=${job.id})}" method="post" enctype="multipart/form-data" id="job-application-form">
+                            <div class="form-group">
+                                <label for="coverLetter">Thư giới thiệu (Không bắt buộc)</label>
+                                <textarea name="coverLetter" id="coverLetter" rows="4" class="form-control" placeholder="Viết một đoạn ngắn giới thiệu bản thân bạn với nhà tuyển dụng..."></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="cvFile">Chọn hồ sơ CV ứng tuyển</label>
+                                <div class="file-upload-wrapper" id="upload-box">
+                                    <input type="file" name="cvFile" id="cvFile" accept=".pdf,.docx" required onchange="showFileName(this)">
+                                    <div class="file-upload-text">
+                                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="margin: 0 auto 0.5rem auto; display: block; color: var(--primary);">
+                                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>
+                                            <polyline points="17 8 12 3 7 8"/>
+                                            <line x1="12" y1="3" x2="12" y2="15"/>
+                                        </svg>
+                                        Kéo thả file vào đây hoặc click để <strong>chọn file</strong> từ máy tính
+                                    </div>
+                                    <div class="file-name-display" id="file-name-txt">Filename.pdf</div>
+                                </div>
+                            </div>
+                            
+                            <button type="submit" class="btn-submit" id="btn-submit-application">
+                                Nộp hồ sơ ngay
+                            </button>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- Authenticated Non-Candidate View -->
+                <div sec:authorize="isAuthenticated()" th:if="${!isCandidate}" class="status-banner status-banner-applied" style="background-color: #f1f5f9; border-color: var(--border-color); color: var(--text-muted);">
+                    Bạn đang đăng nhập bằng tài khoản nội bộ (Nhân viên). Yêu cầu tài khoản Ứng viên để nộp hồ sơ.
+                </div>
+                
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+    <script>
+        function showFileName(input) {
+            const display = document.getElementById('file-name-txt');
+            if (input.files && input.files.length > 0) {
+                display.innerText = "CV đã chọn: " + input.files[0].name;
+                display.style.display = 'block';
+            } else {
+                display.style.display = 'none';
+            }
+        }
+    </script>
+</body>
+</html>

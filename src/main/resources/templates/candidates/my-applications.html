@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Việc làm đã nộp - TalentHub</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+
+    <!-- Header Navigation -->
+    <header>
+        <div class="nav-container">
+            <a href="/" class="logo">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="color: var(--primary)">
+                    <rect x="2" y="7" width="20" height="14" rx="2"/>
+                    <path d="M17 7V5C17 3.89543 16.1046 3 15 3H9C7.89543 3 7 3.89543 7 5V7"/>
+                </svg>
+                Talent<span>Hub</span>
+            </a>
+            
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="/jobs">Việc làm</a></li>
+                    <li><a href="/my-applications" class="active">Việc đã ứng tuyển</a></li>
+                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
+                        <a href="/reports/pipeline">Nhà tuyển dụng</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <a href="/change-password">Thiết lập</a>
+                    </li>
+                    <li sec:authorize="isAuthenticated()">
+                        <form th:action="@{/logout}" method="post" style="display:inline;">
+                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
+                        </form>
+                    </li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <!-- Main Container -->
+    <main class="main-content">
+        
+        <h1 class="page-title">Việc làm đã nộp ứng tuyển</h1>
+
+        <!-- Filter Tabs (SCR-15) -->
+        <div class="tabs-bar" id="status-tabs-container">
+            <a href="/my-applications" class="tab-item" th:classappend="${selectedStatus == 'ALL'} ? 'active'">Tất cả</a>
+            <a href="/my-applications?status=applied" class="tab-item" th:classappend="${selectedStatus == 'APPLIED'} ? 'active'">Đã nộp đơn</a>
+            <a href="/my-applications?status=screening" class="tab-item" th:classappend="${selectedStatus == 'SCREENING'} ? 'active'">Xem xét hồ sơ</a>
+            <a href="/my-applications?status=interview" class="tab-item" th:classappend="${selectedStatus == 'INTERVIEW'} ? 'active'">Lịch phỏng vấn</a>
+            <a href="/my-applications?status=offer" class="tab-item" th:classappend="${selectedStatus == 'OFFER'} ? 'active'">Nhận Offer</a>
+            <a href="/my-applications?status=hired" class="tab-item" th:classappend="${selectedStatus == 'HIRED'} ? 'active'">Đã nhận việc</a>
+            <a href="/my-applications?status=rejected" class="tab-item" th:classappend="${selectedStatus == 'REJECTED'} ? 'active'">Từ chối</a>
+            <a href="/my-applications?status=withdrawn" class="tab-item" th:classappend="${selectedStatus == 'WITHDRAWN'} ? 'active'">Đã rút hồ sơ</a>
+        </div>
+
+        <!-- Applications Table Grid -->
+        <div class="applications-card">
+            
+            <table th:if="${not #lists.isEmpty(applications)}" id="applications-table">
+                <thead>
+                    <tr>
+                        <th>Tên công việc</th>
+                        <th>Phòng ban</th>
+                        <th>Ngày nộp</th>
+                        <th>Trạng thái hồ sơ</th>
+                        <th>Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr th:each="app : ${applications}">
+                        <td>
+                            <a th:href="@{/jobs/{id}(id=${app.job.id})}" class="job-title-link" th:text="${app.job.title}">Tên vị trí công việc</a>
+                        </td>
+                        <td class="dept-txt" th:text="${app.job.department}">Công nghệ thông tin</td>
+                        <td class="dept-txt" th:text="${#temporals.format(app.appliedAt, 'yyyy-MM-dd HH:mm')}">2026-06-29 10:00</td>
+                        <td>
+                            <!-- Status Badges aligned with CSS status rules -->
+                            <span class="status-badge" 
+                                  th:classappend="'status-' + ${#strings.toLowerCase(app.status.name())}"
+                                  th:text="${app.status}">APPLIED</span>
+                        </td>
+                        <td>
+                            <!-- Withdraw action allowed for APPLIED and SCREENING only (SCR-15) -->
+                            <div th:if="${app.status.name() == 'APPLIED' or app.status.name() == 'SCREENING'}">
+                                <form th:action="@{/my-applications/withdraw/{id}(id=${app.id})}" method="post" onsubmit="return confirmWithdraw()">
+                                    <button type="submit" class="btn-withdraw" th:id="'btn-withdraw-' + ${app.id}">Rút hồ sơ</button>
+                                </form>
+                            </div>
+                            <span th:unless="${app.status.name() == 'APPLIED' or app.status.name() == 'SCREENING'}" class="dept-txt">-</span>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+
+            <!-- Empty States -->
+            <div class="empty-state" th:if="${#lists.isEmpty(applications)}" id="empty-state-container">
+                <div th:if="${selectedStatus == 'ALL'}">
+                    <p>Bạn chưa nộp đơn vào bất kỳ công việc nào.</p>
+                    <a href="/jobs" class="btn-browse" id="btn-browse-jobs">Tìm việc làm ngay</a>
+                </div>
+                <div th:unless="${selectedStatus == 'ALL'}">
+                    <p>Không có hồ sơ nào ở bước này.</p>
+                    <a href="/my-applications" class="btn-browse" style="background-color: transparent; border: 1px solid var(--border-color); color: var(--text-body); box-shadow: none;">Xem tất cả hồ sơ</a>
+                </div>
+            </div>
+            
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer>
+        <p>&copy; 2026 TalentHub - Nền tảng tuyển dụng lấy cảm hứng từ TopCV. Bản quyền được bảo lưu.</p>
+    </footer>
+
+    <script>
+        function confirmWithdraw() {
+            return confirm("Bạn có chắc chắn muốn rút hồ sơ ứng tuyển này không? Hành động này không thể hoàn tác.");
+        }
+    </script>
+</body>
+</html>
