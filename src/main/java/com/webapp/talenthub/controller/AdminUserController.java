@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/admin/users")
 public class AdminUserController {
 
-    private ActivityLogService activityLogService;    private final UserService userService;
+    private final ActivityLogService activityLogService;
+    private final UserService userService;
 
-    public AdminUserController(UserService userService) {
+    public AdminUserController(ActivityLogService activityLogService, UserService userService) {
+        this.activityLogService = activityLogService;
         this.userService = userService;
 
     }
@@ -40,13 +42,9 @@ public class AdminUserController {
                           Authentication authentication) {
         userService.disable(user.getId());
         activityLogService.save(
-
                 authentication.getName(),
-
                 "DISABLE USER",
-
                 "Disabled " + user.getUsername()
-
         );
         return "redirect:/admin/users";
 
@@ -54,16 +52,12 @@ public class AdminUserController {
 
     @GetMapping("/{id}/enable")
     public String enable(@ModelAttribute User user,
-                         Authentication authentication){
+                         Authentication authentication) {
         userService.enable(user.getId());
         activityLogService.save(
-
                 authentication.getName(),
-
                 "ENABLE USER",
-
                 "Enabled " + user.getUsername()
-
         );
         return "redirect:/admin/users";
 
@@ -71,16 +65,12 @@ public class AdminUserController {
 
     @GetMapping("/{id}/unlock")
     public String unlock(@ModelAttribute User user,
-                         Authentication authentication){
+                         Authentication authentication) {
         userService.unlock(user.getId());
         activityLogService.save(
-
                 authentication.getName(),
-
                 "UNLOCK USER",
-
                 "Unlocked " + user.getUsername()
-
         );
         return "redirect:/admin/users";
     }
@@ -95,21 +85,18 @@ public class AdminUserController {
     @PostMapping("/create")
     public String createUser(@ModelAttribute User user,
                              Authentication authentication) {
-
         userService.createUser(user);
-
         activityLogService.save(
                 authentication.getName(),
                 "CREATE USER",
                 "Created account: " + user.getUsername()
         );
-
         return "redirect:/admin/users";
     }
 
     @GetMapping("/edit/{id}")
     public String editUser(@PathVariable Long id,
-                           Model model){
+                           Model model) {
         User user = userService.getUserById(id);
         user.setPassword("");
         model.addAttribute("user", user);
@@ -120,7 +107,7 @@ public class AdminUserController {
 
     @PostMapping("/edit")
     public String updateUser(@ModelAttribute User user,
-                             Authentication authentication){
+                             Authentication authentication) {
         userService.updateUser(user);
         activityLogService.save(
                 authentication.getName(),
