@@ -108,13 +108,11 @@
             <nav>
                 <ul class="nav-links">
                     <li><a href="/jobs">Việc làm</a></li>
-                    <li sec:authorize="hasRole('CANDIDATE')"><a href="/my-applications">Việc đã ứng tuyển</a></li>
-                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')"><a href="/dashboard" class="active">Nhà tuyển dụng</a></li>
-                    <li sec:authorize="isAuthenticated()"><a href="/change-password">Thiết lập</a></li>
-                    <li sec:authorize="isAuthenticated()">
-                        <form th:action="@{/logout}" method="post" style="display:inline;">
-                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
-                        </form>
+                    <li th:if="${session.LOGIN_USER != null && session.LOGIN_USER.role.name() == 'CANDIDATE'}"><a href="/my-applications">Việc đã ứng tuyển</a></li>
+                    <li th:if="${session.LOGIN_USER != null && (session.LOGIN_USER.role.name() == 'ADMIN' || session.LOGIN_USER.role.name() == 'HR_MANAGER')}"><a href="/dashboard" class="active">Nhà tuyển dụng</a></li>
+                    <li th:if="${session.LOGIN_USER != null}"><a href="/change-password">Thiết lập</a></li>
+                    <li th:if="${session.LOGIN_USER != null}">
+                        <a href="/logout" style="color:var(--text-title); font-weight:600; font-size:0.95rem; text-decoration:none;">Đăng xuất</a>
                     </li>
                 </ul>
             </nav>
@@ -126,7 +124,7 @@
 
         <!-- Recruiter Welcome message -->
         <div class="dashboard-welcome" id="recruiter-welcome-banner">
-            <h2 th:text="'Xin chào, ' + ${#authentication.principal.user.fullName} + '!'">Xin chào, Nhà tuyển dụng!</h2>
+            <h2 th:text="'Xin chào, ' + ${session.LOGIN_USER.fullName} + '!'">Xin chào, Nhà tuyển dụng!</h2>
             <p>Chào mừng quay trở lại hệ thống quản trị tuyển dụng TalentHub. Đây là các số liệu thống kê công việc của bạn.</p>
         </div>
 

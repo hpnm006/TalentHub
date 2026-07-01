@@ -25,25 +25,23 @@
             <nav>
                 <ul class="nav-links">
                     <li><a href="/jobs">Việc làm</a></li>
-                    <li sec:authorize="hasRole('CANDIDATE')">
+                    <li th:if="${session.LOGIN_USER != null && session.LOGIN_USER.role.name() == 'CANDIDATE'}">
                         <a href="/my-applications">Việc đã ứng tuyển</a>
                     </li>
-                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
+                    <li th:if="${session.LOGIN_USER != null && (session.LOGIN_USER.role.name() == 'ADMIN' || session.LOGIN_USER.role.name() == 'HR_MANAGER')}">
                         <a href="/dashboard">Nhà tuyển dụng</a>
                     </li>
-                    <li sec:authorize="isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER != null}">
                         <a href="/change-password">Thiết lập</a>
                     </li>
-                    <li sec:authorize="!isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER == null}">
                         <a href="/login" class="btn-login">Đăng nhập</a>
                     </li>
-                    <li sec:authorize="!isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER == null}">
                         <a href="/register" class="btn-signup">Đăng ký</a>
                     </li>
-                    <li sec:authorize="isAuthenticated()">
-                        <form th:action="@{/logout}" method="post" style="display:inline;">
-                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem;">Đăng xuất</button>
-                        </form>
+                    <li th:if="${session.LOGIN_USER != null}">
+                        <a href="/logout" style="color:var(--text-title); font-weight:600; font-size:0.95rem; text-decoration:none;">Đăng xuất</a>
                     </li>
                 </ul>
             </nav>
@@ -102,12 +100,12 @@
             <div class="apply-section" id="application-area">
                 
                 <!-- GUEST View: Prompt to sign in -->
-                <div sec:authorize="!isAuthenticated()" class="status-banner status-banner-guest" id="guest-apply-banner">
+                <div th:if="${session.LOGIN_USER == null}" class="status-banner status-banner-guest" id="guest-apply-banner">
                     Vui lòng <a href="/login">Đăng nhập</a> hoặc <a href="/register">Tạo tài khoản ứng viên</a> để nộp đơn ứng tuyển công việc này.
                 </div>
 
                 <!-- AUTHENTICATED CANDIDATE View -->
-                <div sec:authorize="isAuthenticated()" th:if="${isCandidate}">
+                <div th:if="${session.LOGIN_USER != null && isCandidate}">
                     
                     <!-- Scenario 1: Already Applied -->
                     <div th:if="${hasApplied}" class="status-banner status-banner-applied" id="already-applied-banner">
@@ -154,7 +152,7 @@
                 </div>
                 
                 <!-- Authenticated Non-Candidate View -->
-                <div sec:authorize="isAuthenticated()" th:if="${!isCandidate}" class="status-banner status-banner-applied" style="background-color: #f1f5f9; border-color: var(--border-color); color: var(--text-muted);">
+                <div th:if="${session.LOGIN_USER != null && !isCandidate}" class="status-banner status-banner-applied" style="background-color: #f1f5f9; border-color: var(--border-color); color: var(--text-muted);">
                     Bạn đang đăng nhập bằng tài khoản nội bộ (Nhân viên). Yêu cầu tài khoản Ứng viên để nộp hồ sơ.
                 </div>
                 

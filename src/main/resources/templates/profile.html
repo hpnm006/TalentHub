@@ -6,7 +6,7 @@
 
 <div class="page-container">
 
-    <aside sec:authorize="hasAnyRole('ADMIN','HR_MANAGER')"
+    <aside th:if="${session.LOGIN_USER != null && (session.LOGIN_USER.role.name() == 'ADMIN' || session.LOGIN_USER.role.name() == 'HR_MANAGER')}"
            th:replace="fragments/sidebar :: sidebar">
     </aside>
 
@@ -114,7 +114,7 @@
                 </a>
 
                 <a class="action-card"
-                   sec:authorize="hasAnyRole('ADMIN','HR_MANAGER')"
+                   th:if="${session.LOGIN_USER != null && (session.LOGIN_USER.role.name() == 'ADMIN' || session.LOGIN_USER.role.name() == 'HR_MANAGER')}"
                    th:href="@{/admin/dashboard}">
 
                     📊
@@ -124,7 +124,7 @@
                 </a>
 
                 <a class="action-card"
-                   sec:authorize="hasRole('ADMIN')"
+                   th:if="${session.LOGIN_USER != null && session.LOGIN_USER.role.name() == 'ADMIN'}"
                    th:href="@{/admin/users}">
 
                     👥
@@ -134,7 +134,7 @@
                 </a>
 
                 <a class="action-card"
-                   sec:authorize="hasRole('ADMIN')"
+                   th:if="${session.LOGIN_USER != null && session.LOGIN_USER.role.name() == 'ADMIN'}"
                    th:href="@{/admin/activity-log}">
 
                     📋
@@ -149,15 +149,9 @@
 
         <div class="logout-box">
 
-            <form th:action="@{/logout}" method="post">
-
-                <button class="logout-btn">
-
-                    Logout
-
-                </button>
-
-            </form>
+            <a th:href="@{/logout}" class="logout-btn" style="display: inline-block; text-align: center; text-decoration: none; line-height: 40px; padding: 0 20px;">
+                Logout
+            </a>
 
         </div>
 

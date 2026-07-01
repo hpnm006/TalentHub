@@ -27,34 +27,32 @@
                 <ul class="nav-links">
                     <li><a href="/jobs">Việc làm</a></li>
                     
-                    <li sec:authorize="hasRole('CANDIDATE')">
+                    <li th:if="${session.LOGIN_USER != null && session.LOGIN_USER.role.name() == 'CANDIDATE'}">
                         <a href="/my-applications">Việc đã ứng tuyển</a>
                     </li>
 
-                    <li sec:authorize="isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER != null}">
                         <a th:href="@{/profile}">Profile</a>
                     </li>
 
-                    <li sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')">
+                    <li th:if="${session.LOGIN_USER != null && (session.LOGIN_USER.role.name() == 'ADMIN' || session.LOGIN_USER.role.name() == 'HR_MANAGER')}">
                         <a href="/dashboard">Nhà tuyển dụng</a>
                     </li>
                     
-                    <li sec:authorize="isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER != null}">
                         <a href="/change-password">Thiết lập</a>
                     </li>
                     
-                    <li sec:authorize="!isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER == null}">
                         <a href="/login" class="btn-login">Đăng nhập</a>
                     </li>
                     
-                    <li sec:authorize="!isAuthenticated()">
+                    <li th:if="${session.LOGIN_USER == null}">
                         <a href="/register" class="btn-signup">Đăng ký</a>
                     </li>
                     
-                    <li sec:authorize="isAuthenticated()">
-                        <form th:action="@{/logout}" method="post" style="display:inline;">
-                            <button type="submit" style="background:none; border:none; color:var(--text-title); cursor:pointer; font-weight:600; font-size:0.95rem; transition:color 0.2s;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-title)'">Đăng xuất</button>
-                        </form>
+                    <li th:if="${session.LOGIN_USER != null}">
+                        <a href="/logout" style="color:var(--text-title); font-weight:600; font-size:0.95rem; transition:color 0.2s; text-decoration:none;" onmouseover="this.style.color='var(--primary)'" onmouseout="this.style.color='var(--text-title)'">Đăng xuất</a>
                     </li>
                 </ul>
             </nav>
@@ -64,7 +62,7 @@
     <!-- Hero Banner Section -->
     <main class="hero-banner">
         <div class="hero-content">
-            <div th:if="${#authorization.expression('isAuthenticated()')}" style="font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem;" th:text="'Xin chào, ' + ${#authentication.principal.user.fullName}">Xin chào</div>
+            <div th:if="${session.LOGIN_USER != null}" style="font-size: 1.1rem; font-weight: 600; color: var(--primary); margin-bottom: 1rem;" th:text="'Xin chào, ' + ${session.LOGIN_USER.fullName}">Xin chào</div>
             <h1>Tìm việc làm mơ ước cùng <span>TalentHub</span></h1>
             <p>Kết nối ứng viên tài năng với các nhà tuyển dụng hàng đầu. Tìm việc phù hợp và theo dõi quy trình ứng tuyển hoàn chỉnh.</p>
             <a href="/jobs" class="btn-cta">Tìm việc ngay</a>
@@ -91,7 +89,7 @@
             </a>
 
             <!-- Card 2: Candidate Applications (Candidate view) / Sign up (Guest view) -->
-            <a href="/my-applications" sec:authorize="hasRole('CANDIDATE')" class="feature-card" id="home-card-candidate">
+            <a href="/my-applications" th:if="${session.LOGIN_USER != null && session.LOGIN_USER.role.name() == 'CANDIDATE'}" class="feature-card" id="home-card-candidate">
                 <div>
                     <div class="icon-box">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -107,7 +105,7 @@
                 <span class="card-link">Theo dõi hồ sơ &raquo;</span>
             </a>
 
-            <a href="/register" sec:authorize="!isAuthenticated()" class="feature-card" id="home-card-register">
+            <a href="/register" th:if="${session.LOGIN_USER == null}" class="feature-card" id="home-card-register">
                 <div>
                     <div class="icon-box">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -122,7 +120,7 @@
             </a>
 
             <!-- Card 3: Recruiter Dashboard -->
-            <a href="/reports/pipeline" sec:authorize="hasAnyRole('ADMIN', 'HR_MANAGER')" class="feature-card" id="home-card-recruiter">
+            <a href="/reports/pipeline" th:if="${session.LOGIN_USER != null && (session.LOGIN_USER.role.name() == 'ADMIN' || session.LOGIN_USER.role.name() == 'HR_MANAGER')}" class="feature-card" id="home-card-recruiter">
                 <div>
                     <div class="icon-box">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -138,7 +136,7 @@
             </a>
 
             <!-- Card 4: Change Password / Settings -->
-            <a href="/change-password" sec:authorize="isAuthenticated()" class="feature-card" id="home-card-settings">
+            <a href="/change-password" th:if="${session.LOGIN_USER != null}" class="feature-card" id="home-card-settings">
                 <div>
                     <div class="icon-box">
                         <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
