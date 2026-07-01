@@ -5,10 +5,10 @@ import com.webapp.talenthub.entity.JobStatus;
 import com.webapp.talenthub.entity.User;
 import com.webapp.talenthub.repository.ApplicationRepository;
 import com.webapp.talenthub.repository.InterviewRepository;
-import com.webapp.talenthub.security.CustomUserDetails;
 import com.webapp.talenthub.service.JobService;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -24,9 +24,10 @@ public class HRDashboardController {
     private final InterviewRepository interviewRepository;
 
     @Autowired
-    public HRDashboardController(JobService jobService, 
-                                 ApplicationRepository applicationRepository, 
+    public HRDashboardController(JobService jobService,
+                                 ApplicationRepository applicationRepository,
                                  InterviewRepository interviewRepository) {
+
         this.jobService = jobService;
         this.applicationRepository = applicationRepository;
         this.interviewRepository = interviewRepository;
@@ -34,30 +35,42 @@ public class HRDashboardController {
 
     // SCR-06: HR Dashboard
     @GetMapping("/dashboard")
-    public String viewDashboard(
-            @AuthenticationPrincipal CustomUserDetails userDetails,
-            Model model) {
+    public String viewDashboard(HttpSession session,
+                                Model model) {
 
-        if (userDetails == null) {
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
             return "redirect:/login";
         }
 
-        User user = userDetails.getUser();
         Long hrId = user.getId();
 
-        // 1. ACTIVE jobs count for this HR
-        long activeJobsCount = jobService.countByStatusAndCreator(JobStatus.ACTIVE, hrId);
+        // ACTIVE jobs count
+        long activeJobsCount =
+                jobService.countByStatusAndCreator(JobStatus.ACTIVE, hrId);
 
-        // 2. APPLIED applications count under jobs of this HR
-        long newApplicationsCount = applicationRepository.countNewApplicationsForHr(hrId);
+        // New applications
+        long newApplicationsCount =
+                applicationRepository.countNewApplicationsForHr(hrId);
 
-        // 3. Interviews scheduled in the next 7 days
+        // Upcoming interviews
         LocalDateTime now = LocalDateTime.now();
         LocalDateTime sevenDaysLater = now.plusDays(7);
-        long upcomingInterviewsCount = interviewRepository.countUpcomingInterviewsForHr(hrId, now, sevenDaysLater);
 
-        // 4. List of ACTIVE jobs created by this HR
-        List<Job> activeJobs = jobService.getJobsByStatusAndCreator(JobStatus.ACTIVE, hrId);
+        long upcomingInterviewsCount =
+                interviewRepository.countUpcomingInterviewsForHr(
+                        hrId,
+                        now,
+                        sevenDaysLater
+                );
+
+        // Active jobs
+        List<Job> activeJobs =
+                jobService.getJobsByStatusAndCreator(
+                        JobStatus.ACTIVE,
+                        hrId
+                );
 
         model.addAttribute("activeJobsCount", activeJobsCount);
         model.addAttribute("newApplicationsCount", newApplicationsCount);

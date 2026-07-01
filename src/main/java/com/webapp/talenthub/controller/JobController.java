@@ -1,18 +1,15 @@
 package com.webapp.talenthub.controller;
 
-import com.webapp.talenthub.entity.Application;
-import com.webapp.talenthub.entity.Job;
-import com.webapp.talenthub.entity.JobStatus;
-import com.webapp.talenthub.entity.User;
-import com.webapp.talenthub.security.CustomUserDetails;
+import com.webapp.talenthub.entity.*;
 import com.webapp.talenthub.service.ApplicationService;
 import com.webapp.talenthub.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 
@@ -90,16 +87,25 @@ public class JobController {
     // SCR-11: Save Job (both Create and Edit)
     @PostMapping("/save")
     public String saveJob(
+
             @ModelAttribute("job") Job job,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+
+            HttpSession session,
+
             RedirectAttributes redirectAttributes) {
 
-        if (userDetails == null) {
-            redirectAttributes.addFlashAttribute("error", "Vui lòng đăng nhập.");
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
+
             return "redirect:/login";
+
         }
 
-        User user = userDetails.getUser();
+        if (user.getRole() != Role.ADMIN
+                && user.getRole() != Role.HR_MANAGER) {
+            return "redirect:/access-denied";
+        }
 
         try {
             jobService.saveJob(job, user);
@@ -127,13 +133,25 @@ public class JobController {
     @PostMapping("/{id}/publish")
     public String publishJob(
             @PathVariable("id") Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (userDetails == null) return "redirect:/login";
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
+
+            return "redirect:/login";
+
+        }
+
+        if (user.getRole() != Role.ADMIN
+                && user.getRole() != Role.HR_MANAGER) {
+            return "redirect:/access-denied";
+        }
         
         try {
-            jobService.publishJob(id, userDetails.getUser());
+            jobService.publishJob(id,
+                    user);
             redirectAttributes.addFlashAttribute("success", "Đã phát hành bài đăng thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Phát hành thất bại: " + e.getMessage());
@@ -145,13 +163,25 @@ public class JobController {
     @PostMapping("/{id}/close")
     public String closeJob(
             @PathVariable("id") Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (userDetails == null) return "redirect:/login";
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
+
+            return "redirect:/login";
+
+        }
+
+        if (user.getRole() != Role.ADMIN
+                && user.getRole() != Role.HR_MANAGER) {
+            return "redirect:/access-denied";
+        }
         
         try {
-            jobService.closeJob(id, userDetails.getUser());
+            jobService.closeJob(id,
+                    user);
             redirectAttributes.addFlashAttribute("success", "Đã đóng tin tuyển dụng thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Đóng tin thất bại: " + e.getMessage());
@@ -163,13 +193,25 @@ public class JobController {
     @PostMapping("/{id}/delete")
     public String deleteJob(
             @PathVariable("id") Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (userDetails == null) return "redirect:/login";
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
+
+            return "redirect:/login";
+
+        }
+
+        if (user.getRole() != Role.ADMIN
+                && user.getRole() != Role.HR_MANAGER) {
+            return "redirect:/access-denied";
+        }
         
         try {
-            jobService.deleteJob(id, userDetails.getUser());
+            jobService.deleteJob(id,
+                    user);
             redirectAttributes.addFlashAttribute("success", "Đã xóa tin tuyển dụng nháp thành công!");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Xóa thất bại: " + e.getMessage());

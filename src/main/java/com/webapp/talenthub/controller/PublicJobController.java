@@ -1,17 +1,18 @@
 package com.webapp.talenthub.controller;
 
 import com.webapp.talenthub.entity.Job;
+import com.webapp.talenthub.entity.Role;
 import com.webapp.talenthub.entity.User;
-import com.webapp.talenthub.security.CustomUserDetails;
 import com.webapp.talenthub.service.ApplicationService;
 import com.webapp.talenthub.service.JobService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 
@@ -52,17 +53,21 @@ public class PublicJobController {
     @GetMapping("/{id}")
     public String viewPublicJobDetail(
             @PathVariable("id") Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             Model model) {
 
         Job job = jobService.getJobById(id);
         boolean hasApplied = false;
         boolean isCandidate = false;
 
-        if (userDetails != null) {
-            User user = userDetails.getUser();
-            isCandidate = "CANDIDATE".equals(user.getRole().name());
+        User user = SessionUtil.getUser(session);
+
+        if (user != null) {
+
+            isCandidate = user.getRole() == Role.CANDIDATE;
+
             hasApplied = applicationService.hasApplied(id, user.getId());
+
         }
 
         model.addAttribute("job", job);
@@ -79,16 +84,22 @@ public class PublicJobController {
             @PathVariable("id") Long id,
             @RequestParam("coverLetter") String coverLetter,
             @RequestParam("cvFile") MultipartFile cvFile,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (userDetails == null) {
-            redirectAttributes.addFlashAttribute("error", "You must login to apply for positions.");
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
+
+            session.setAttribute("REDIRECT_URL", "/jobs/" + id);
+
+            redirectAttributes.addFlashAttribute(
+                    "error",
+                    "Please login first.");
+
             return "redirect:/login";
         }
-
-        User user = userDetails.getUser();
-        if (!"CANDIDATE".equals(user.getRole().name())) {
+        if (user.getRole() != Role.CANDIDATE) {
             redirectAttributes.addFlashAttribute("error", "Only Candidate role can apply for jobs.");
             return "redirect:/jobs/" + id;
         }

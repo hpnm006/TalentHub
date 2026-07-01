@@ -5,10 +5,11 @@ import com.webapp.talenthub.entity.Role;
 import com.webapp.talenthub.entity.User;
 import com.webapp.talenthub.service.ActivityLogService;
 import com.webapp.talenthub.service.UserService;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 @RequestMapping("/admin/users")
@@ -39,39 +40,76 @@ public class AdminUserController {
 
     @GetMapping("/{id}/disable")
     public String disable(@ModelAttribute User user,
-                          Authentication authentication) {
+                          HttpSession session) {
+
+        User loginUser = SessionUtil.getUser(session);
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        if (loginUser.getRole() != Role.ADMIN) {
+            return "redirect:/access-denied";
+        }
+
         userService.disable(user.getId());
+
         activityLogService.save(
-                authentication.getName(),
+                loginUser.getUsername(),
                 "DISABLE USER",
                 "Disabled " + user.getUsername()
         );
-        return "redirect:/admin/users";
 
+        return "redirect:/admin/users";
     }
 
     @GetMapping("/{id}/enable")
     public String enable(@ModelAttribute User user,
-                         Authentication authentication) {
+                         HttpSession session) {
+
+        User loginUser = SessionUtil.getUser(session);
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        if (loginUser.getRole() != Role.ADMIN) {
+            return "redirect:/access-denied";
+        }
+
         userService.enable(user.getId());
+
         activityLogService.save(
-                authentication.getName(),
+                loginUser.getUsername(),
                 "ENABLE USER",
                 "Enabled " + user.getUsername()
         );
-        return "redirect:/admin/users";
 
+        return "redirect:/admin/users";
     }
 
     @GetMapping("/{id}/unlock")
     public String unlock(@ModelAttribute User user,
-                         Authentication authentication) {
+                         HttpSession session) {
+
+        User loginUser = SessionUtil.getUser(session);
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        if (loginUser.getRole() != Role.ADMIN) {
+            return "redirect:/access-denied";
+        }
+
         userService.unlock(user.getId());
+
         activityLogService.save(
-                authentication.getName(),
+                loginUser.getUsername(),
                 "UNLOCK USER",
                 "Unlocked " + user.getUsername()
         );
+
         return "redirect:/admin/users";
     }
 
@@ -84,13 +122,26 @@ public class AdminUserController {
 
     @PostMapping("/create")
     public String createUser(@ModelAttribute User user,
-                             Authentication authentication) {
+                             HttpSession session) {
+
+        User loginUser = SessionUtil.getUser(session);
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        if (loginUser.getRole() != Role.ADMIN) {
+            return "redirect:/access-denied";
+        }
+
         userService.createUser(user);
+
         activityLogService.save(
-                authentication.getName(),
+                loginUser.getUsername(),
                 "CREATE USER",
                 "Created account: " + user.getUsername()
         );
+
         return "redirect:/admin/users";
     }
 
@@ -107,13 +158,26 @@ public class AdminUserController {
 
     @PostMapping("/edit")
     public String updateUser(@ModelAttribute User user,
-                             Authentication authentication) {
+                             HttpSession session) {
+
+        User loginUser = SessionUtil.getUser(session);
+
+        if (loginUser == null) {
+            return "redirect:/login";
+        }
+
+        if (loginUser.getRole() != Role.ADMIN) {
+            return "redirect:/access-denied";
+        }
+
         userService.updateUser(user);
+
         activityLogService.save(
-                authentication.getName(),
+                loginUser.getUsername(),
                 "EDIT USER",
                 "Updated account: " + user.getUsername()
         );
+
         return "redirect:/admin/users";
     }
 }

@@ -4,7 +4,7 @@ import com.webapp.talenthub.entity.Role;
 import com.webapp.talenthub.entity.User;
 import com.webapp.talenthub.repository.UserRepository;
 import jakarta.annotation.Nonnull;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -13,12 +13,10 @@ import java.util.List;
 public class UserService {
 
     private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository,
-                       PasswordEncoder passwordEncoder) {
+    public UserService(UserRepository userRepository) {
+
         this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
     }
 
     public User getCurrentUser(String username) {
@@ -36,7 +34,12 @@ public class UserService {
     }
 
     public User createUser(User user) {
-        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        user.setPassword(
+                BCrypt.hashpw(
+                        user.getPassword(),
+                        BCrypt.gensalt()
+                )
+        );
         return userRepository.save(user);
     }
 
@@ -134,7 +137,11 @@ public class UserService {
 
         if (updatedUser.getPassword() != null &&
                 !updatedUser.getPassword().isBlank()) {
-            user.setPassword(passwordEncoder.encode(updatedUser.getPassword())
+            user.setPassword(
+                    BCrypt.hashpw(
+                            updatedUser.getPassword(),
+                            BCrypt.gensalt()
+                    )
             );
         }
         userRepository.save(user);

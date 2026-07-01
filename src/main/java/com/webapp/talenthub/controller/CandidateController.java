@@ -2,14 +2,14 @@ package com.webapp.talenthub.controller;
 
 import com.webapp.talenthub.entity.Application;
 import com.webapp.talenthub.entity.User;
-import com.webapp.talenthub.security.CustomUserDetails;
 import com.webapp.talenthub.service.ApplicationService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,14 +29,14 @@ public class CandidateController {
     @GetMapping
     public String viewMyApplications(
             @RequestParam(value = "status", required = false) String statusStr,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             Model model) {
 
-        if (userDetails == null) {
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
             return "redirect:/login";
         }
-
-        User user = userDetails.getUser();
         List<Application> applications = applicationService.getApplicationsByCandidate(user.getId());
 
         // Optional status filtering
@@ -56,14 +56,14 @@ public class CandidateController {
     @PostMapping("/withdraw/{id}")
     public String withdrawApplication(
             @PathVariable("id") Long id,
-            @AuthenticationPrincipal CustomUserDetails userDetails,
+            HttpSession session,
             RedirectAttributes redirectAttributes) {
 
-        if (userDetails == null) {
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
             return "redirect:/login";
         }
-
-        User user = userDetails.getUser();
         try {
             applicationService.withdrawApplication(id, user);
             redirectAttributes.addFlashAttribute("success", "Application withdrawn successfully.");

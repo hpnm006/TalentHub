@@ -2,10 +2,11 @@ package com.webapp.talenthub.controller;
 
 import com.webapp.talenthub.entity.User;
 import com.webapp.talenthub.repository.UserRepository;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class ProfileController {
@@ -17,13 +18,14 @@ public class ProfileController {
     }
 
     @GetMapping("/profile")
-    public String profile(Authentication authentication,
+    public String profile(HttpSession session,
                           Model model) {
 
-        String username = authentication.getName();
+        User user = SessionUtil.getUser(session);
 
-        User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found"));
+        if (user == null) {
+            return "redirect:/login";
+        }
 
         model.addAttribute("user", user);
 

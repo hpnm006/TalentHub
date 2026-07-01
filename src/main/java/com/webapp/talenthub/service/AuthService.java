@@ -5,11 +5,9 @@ import com.webapp.talenthub.entity.Role;
 import com.webapp.talenthub.entity.User;
 import com.webapp.talenthub.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.password.PasswordEncoder;
+import org.mindrot.jbcrypt.BCrypt;
 import org.springframework.stereotype.Service;
 import com.webapp.talenthub.dto.ChangePasswordRequest;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import com.webapp.talenthub.dto.ForgotPasswordRequest;
 import com.webapp.talenthub.dto.ResetPasswordRequest;
 import java.security.SecureRandom;
@@ -20,8 +18,7 @@ public class AuthService {
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private PasswordEncoder passwordEncoder;
+
 
     public String register(RegisterRequest request) {
 
@@ -72,7 +69,12 @@ public class AuthService {
 
         user.setEmail(request.getEmail());
 
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setPassword(
+                BCrypt.hashpw(
+                        request.getPassword(),
+                        BCrypt.gensalt()
+                )
+        );
 
         user.setRole(Role.CANDIDATE);
 
@@ -87,20 +89,14 @@ public class AuthService {
         return "success";
     }
 
-    public String changePassword(ChangePasswordRequest request) {
-
-        Authentication authentication =
-                SecurityContextHolder.getContext().getAuthentication();
-
-        String username = authentication.getName();
-
-        User user = userRepository.findByUsername(username).orElse(null);
+    public String changePassword(ChangePasswordRequest request,
+                                 User user) {
 
         if (user == null) {
             return "User not found";
         }
 
-        if (!passwordEncoder.matches(request.getOldPassword(), user.getPassword())) {
+        if (!BCrypt.checkpw(request.getOldPassword(), user.getPassword())) {
             return "Current password is incorrect";
         }
 
@@ -108,7 +104,7 @@ public class AuthService {
             return "Passwords do not match";
         }
 
-        if (passwordEncoder.matches(request.getNewPassword(), user.getPassword())) {
+        if (BCrypt.checkpw(request.getNewPassword(), user.getPassword())) {
             return "New password must be different from current password";
         }
 
@@ -118,7 +114,12 @@ public class AuthService {
             return error;
         }
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPassword(
+                BCrypt.hashpw(
+                        request.getNewPassword(),
+                        BCrypt.gensalt()
+                )
+        );
 
         userRepository.save(user);
 
@@ -178,7 +179,12 @@ public class AuthService {
             return error;
         }
 
-        user.setPassword(passwordEncoder.encode(request.getNewPassword()));
+        user.setPassword(
+                BCrypt.hashpw(
+                        request.getNewPassword(),
+                        BCrypt.gensalt()
+                )
+        );
 
         user.setResetCode(null);
 

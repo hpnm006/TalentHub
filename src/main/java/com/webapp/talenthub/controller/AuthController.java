@@ -12,6 +12,9 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import com.webapp.talenthub.entity.User;
+import com.webapp.talenthub.util.SessionUtil;
+import jakarta.servlet.http.HttpSession;
 
 @Controller
 public class AuthController {
@@ -177,9 +180,16 @@ public class AuthController {
     @PostMapping("/change-password")
     public String changePassword(
             @ModelAttribute ChangePasswordRequest request,
+            HttpSession session,
             Model model) {
 
-        String result = authService.changePassword(request);
+        User user = SessionUtil.getUser(session);
+
+        if (user == null) {
+            return "redirect:/login";
+        }
+
+        String result = authService.changePassword(request, user);
 
         if ("success".equals(result)) {
             model.addAttribute("success", "Password changed successfully.");
